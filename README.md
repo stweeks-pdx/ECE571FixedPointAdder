@@ -1,4 +1,4 @@
-# ECE571FixedPointAdder
+# ECE 571 IEEE-754 ADDER Group 1
 IEEE-754 Point Adder for ECE 571 at PSU
 
 ## Introduction
