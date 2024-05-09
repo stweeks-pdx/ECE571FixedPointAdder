@@ -12,12 +12,15 @@ package floatingpointpkg;
     typedef float_t float;
 
     function automatic shortreal FloatToShortreal(input float f);
-    endfunction
+    return($bitstoshortreal(f));
+    endfunction: FloatToShortreal
 
     function automatic float ShortrealToFloat(input shortreal s);
+    return($shortrealtobits(s));
     endfunction
 
     function automatic void DisplayFloatComponents(input float f);
+    $write("%1b %2h %h\n",f.sign, f.exponent, f.fraction);
     endfunction
 
     function automatic bit IsZero(input float f);
