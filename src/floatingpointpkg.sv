@@ -17,11 +17,11 @@ package floatingpointpkg;
 
     function automatic float ShortrealToFloat(input shortreal s);
     return($shortrealtobits(s));
-    endfunction
+    endfunction: ShortrealToFloat
 
     function automatic void DisplayFloatComponents(input float f);
-    $write("%1b %2h %h\n",f.sign, f.exponent, f.fraction);
-    endfunction
+    $write("%1b %2h %h\n",f.sign, f.exp, f.frac);
+    endfunction: DisplayFloatComponents
 
     function automatic bit IsZero(input float f);
 	return ((f.exp === '0) && (f.frac === 0));
