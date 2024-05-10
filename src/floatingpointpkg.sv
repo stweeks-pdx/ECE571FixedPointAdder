@@ -1,7 +1,8 @@
 package floatingpointpkg;
     parameter VERSION = "0.1";
     parameter EXPBITS = 8;
-    parameter FRACBITS = 23;	
+    parameter FRACBITS = 23;
+    parameter EXPONENT = 255;	
 
     typedef struct packed {
 	logic sign;
@@ -21,7 +22,7 @@ package floatingpointpkg;
     endfunction
 
     function automatic bit IsZero(input float f);
-	return ((f.exp === '0) && (f.frac === 0));
+	return ((f.exp === '0) && (f.frac === '0));
     endfunction
 
     function automatic bit IsDenorm(input float f);
@@ -29,11 +30,11 @@ package floatingpointpkg;
     endfunction
 
     function automatic bit IsNaN(input float f);
-	return ((f.exp === '1) && (f.frac !== '0));
+	return ((f.exp === EXPONENT) && (f.frac !== '0));
     endfunction
 
     function automatic bit IsInf(input float f);
-	return ((f.exp === '1) && (f.frac === '0));
+	return ((f.exp === EXPONENT) && (f.frac === '0));
     endfunction
 
 
