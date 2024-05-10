@@ -1,23 +1,137 @@
 import floatingpointpkg::*;
+
 module top;
 
-	task automatic test(input float_t float);
-	$display("IsZero = %b, IsDenorm = %b, IsNaN = %b, IsInf = %b",IsZero(float),IsDenorm(float), IsNaN(float), IsInf(float));
-	endtask
+float inf;
+float nan;
+float f,S_T_F;
+float zero;
+float denorm;
+bit [31:0] b;
+shortreal s;
+bit error;
 
-	initial
+initial
+begin
+
+//******Verification of  fpnumberfromcomponents verified with 263.30 Float number**************//
+$display("***********************************************************************************\n");
+$display("Verification of  fpnumberfromcomponents verified with 263.30 Float number\n\n");
+
+f	=	fpnumberfromcomponents(0,135,239206);
+$display("f = %b\n", f);
+
+
+$display("***********************************************************************************\n\n\n");
+//***********************************************************************************************//
+
+
+//***************************************Verification of FloatToShortreal************************//
+$display("***********************************************************************************\n");
+$display("Verification of FloatToShortreal\n\n");
+
+
+s	=	FloatToShortreal(f);
+$display("s = %f\n",s);
+
+$display("***********************************************************************************\n\n\n");
+
+
+//***************************************Verification of ShortrealToFloat************************//
+$display("***********************************************************************************\n");
+$display("Verification of ShortrealToFloat\n\n");
+
+S_T_F	=	ShortrealToFloat(263.30);
+$display("ShortrealToFloat = %b\n",S_T_F);
+
+$display("***********************************************************************************\n\n\n");
+//***********************************************************************************************//
+
+
+//****************************VERIFICATION OF THE fpnumberfromcomponents and ShortrealToFloat**************************************//
+$display("***********************************************************************************\n");
+$display("SELF CHECKING!!   Verification of fpnumberfromcomponents and ShortrealToFloat\n\n");
+
+if(S_T_F === f)
+	$display("Both the fpnumberfromcomponents and ShortrealToFloat MATCHED!! for same input value\n");
+else
+	$error("Both the fpnumberfromcomponents and ShortrealToFloat NOT_MATCHED!! for same input value\n");
+
+$display("***********************************************************************************\n\n\n");
+//*************************************************************************************************************************************//
+
+
+//******************************************create and test + and-inf********************************************************************//
+$display("***********************************************************************************\n");
+$display("Verification of isINFINITY\n\n");
+
+inf = fpnumberfromcomponents('0,'1,'0);
+if (!isInf(inf))
 	begin
-	test('0);
-	//denorm
-	test(32'h00484444);
-	test(32'h807C67E7);
-	#10;
-	//NaN
-	test(32'hFFD5E7E7);
-	test(32'h7FAAD998);
-	//Inf
-	test(32'hFF800000);
-	test(32'h7F800000);
-	$finish;
+	$display("*** error *** \n isinfinity +inf broken");
+	error = '1;
 	end
+DisplayFloatComponents(inf);
+$display("%f",FloatToShortreal(inf));
+
+inf = fpnumberfromcomponents('1,'1,'0);
+if (!isInf(inf))
+	begin
+	$display("*** error *** \n isinfinity -inf broken");
+	error = '1;	
+	end
+DisplayFloatComponents(inf);
+$display("%f",FloatToShortreal(inf));
+
+
+
+$display("***********************************************************************************\n\n\n");
+//********************************************************************************************************************************************//
+
+
+//********************************************create and test nan*********************************//
+$display("***********************************************************************************\n");
+$display("Verification of NAN\n\n");
+
+
+nan = fpnumberfromcomponents('0,'1,'1);
+if (!isNaN(nan))
+	begin
+	$display("*** error *** \n isnan +NaN broken");
+	error = '1;	
+	end
+DisplayFloatComponents(nan);
+$display("%f",FloatToShortreal(nan));
+
+nan = fpnumberfromcomponents('1,'1,'1);
+if (!isNaN(nan))
+	begin
+	$display("*** error *** \n isnan -NaN broken");
+	error = '1;	
+	end
+DisplayFloatComponents(nan);
+$display("%f",FloatToShortreal(nan));
+
+$display("***********************************************************************************\n\n\n");
+//********************************************************************************************************************************************//
+
+//********************************************create and test ZERO*********************************//
+$display("***********************************************************************************\n");
+$display("Verification of isZERO\n\n");
+
+zero = fpnumberfromcomponents('0,'0,'0);
+if (!isZero(zero))
+	begin
+	$display("*** error *** \n iszero +0 broken");	
+	error = '1;		
+	end
+DisplayFloatComponents(zero);
+$display("%f",FloatToShortreal(zero));
+
+$display("***********************************************************************************\n\n\n");
+//********************************************************************************************************************************************//
+
+$finish ();
+end
 endmodule
+
