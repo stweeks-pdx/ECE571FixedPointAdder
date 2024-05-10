@@ -4,7 +4,7 @@ module top;
 
 float inf;
 float nan;
-float f,S_T_F,nf;
+float f,S_T_F,nf,N_S_T_F;
 float zero;
 float denorm;
 bit [31:0] b;
@@ -52,6 +52,9 @@ $display("Verification of ShortrealToFloat\n\n");
 S_T_F	=	ShortrealToFloat(263.30);
 $display("ShortrealToFloat = %b\n",S_T_F);
 
+N_S_T_F	=	ShortrealToFloat(-263.30);
+$display("ShortrealToFloat = %b\n",N_S_T_F);
+
 $display("***********************************************************************************\n\n\n");
 //***********************************************************************************************//
 
@@ -64,6 +67,11 @@ if(S_T_F === f)
 	$display("Both the fpnumberfromcomponents and ShortrealToFloat MATCHED!! for same input value\n");
 else
 	$error("Both the fpnumberfromcomponents and ShortrealToFloat NOT_MATCHED!! for same input value\n");
+
+if(N_S_T_F === nf)
+	$display("Both the fpnumberfromcomponents and ShortrealToFloat MATCHED!! for same NEGATIVE input value\n");
+else
+	$error("Both the fpnumberfromcomponents and ShortrealToFloat NOT_MATCHED!! for same NEGATIVE input value\n");
 
 $display("***********************************************************************************\n\n\n");
 //*************************************************************************************************************************************//
