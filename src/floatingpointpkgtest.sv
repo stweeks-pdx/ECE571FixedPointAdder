@@ -4,11 +4,11 @@ module top;
 
 float inf;
 float nan;
-float f,S_T_F;
+float f,S_T_F,nf;
 float zero;
 float denorm;
 bit [31:0] b;
-shortreal s;
+shortreal s, ns;
 bit error;
 
 initial
@@ -20,6 +20,10 @@ $display("Verification of  fpnumberfromcomponents verified with 263.30 Float num
 
 f	=	fpnumberfromcomponents(0,135,239206);
 $display("f = %b\n", f);
+
+nf	=	fpnumberfromcomponents(1,135,239206);
+$display("nf = %b\n", nf);
+
 
 
 $display("***********************************************************************************\n\n\n");
@@ -33,6 +37,10 @@ $display("Verification of FloatToShortreal\n\n");
 
 s	=	FloatToShortreal(f);
 $display("s = %f\n",s);
+
+
+ns	=	FloatToShortreal(nf);
+$display("ns = %f\n",ns);
 
 $display("***********************************************************************************\n\n\n");
 
@@ -134,4 +142,3 @@ $display("**********************************************************************
 $finish ();
 end
 endmodule
-
