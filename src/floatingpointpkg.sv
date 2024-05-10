@@ -1,43 +1,62 @@
 package floatingpointpkg;
-    parameter VERSION = "0.1";
-    parameter EXPBITS = 8;
-    parameter FRACBITS = 23;	
 
-    typedef struct packed {
-	logic sign;
-	logic [EXPBITS-1:0] exp;
-	logic [FRACBITS-1:0] frac;	
-    } float_t;
+localparam EXPONENT_BITS = 8;	// number of exponent bits
+localparam FRACTION_BITS = 23;	// number of significand bits
 
-    typedef float_t float;
+typedef
+  struct packed {
+    bit sign;					// sign
+    bit [EXPONENT_BITS-1:0] exponent;		// exponent
+    bit [FRACTION_BITS-1:0] fraction;		// significand
+  } float;
 
-    function automatic shortreal FloatToShortreal(input float f);
-    return($bitstoshortreal(f));
-    endfunction: FloatToShortreal
 
-    function automatic float ShortrealToFloat(input shortreal s);
-    return($shortrealtobits(s));
-    endfunction: ShortrealToFloat
+// construct floating point number from components
 
-    function automatic void DisplayFloatComponents(input float f);
-    $write("%1b %2h %h\n",f.sign, f.exp, f.frac);
-    endfunction: DisplayFloatComponents
+function float fpnumberfromcomponents(input bit sign, bit [EXPONENT_BITS-1:0] exp, bit [FRACTION_BITS-1:0] frac);
+	fpnumberfromcomponents.sign = sign;
+	fpnumberfromcomponents.exponent = exp;
+	fpnumberfromcomponents.fraction = frac;
+endfunction: fpnumberfromcomponents
 
-    function automatic bit IsZero(input float f);
-	return ((f.exp === '0) && (f.frac === 0));
-    endfunction
+// return shortreal representation of floating point number
 
-    function automatic bit IsDenorm(input float f);
-	return ((f.exp === '0) && (f.frac !== '0));
-    endfunction
+function automatic shortreal FloatToShortreal(input float f);
+	return($bitstoshortreal(f));
+endfunction: FloatToShortreal
 
-    function automatic bit IsNaN(input float f);
-	return ((f.exp === '1) && (f.frac !== '0));
-    endfunction
 
-    function automatic bit IsInf(input float f);
-	return ((f.exp === '1) && (f.frac === '0));
-    endfunction
+// construct floating point number from short real
 
+function automatic float ShortrealToFloat(input shortreal s);
+	return($shortrealtobits(s));
+endfunction: ShortrealToFloat
+
+//Display a floating point number's components
+function automatic void DisplayFloatComponents(input float f);
+    $display("sign : %1b exponent: %2h fraction: %h\n",f.sign, f.exponent, f.fraction);
+endfunction: DisplayFloatComponents
+
+//**********************************ALL FLAGS***********************************//
+function bit isZero(float f);
+	return((f.exponent === '0) && (f.fraction === '0));
+endfunction: isZero
+
+
+function bit isDenorm(float f);
+	return((f.exponent === '0) && (f.fraction !== '0));
+endfunction: isDenorm
+
+
+function bit isNaN(float f);
+	return((f.exponent === '1) && f.fraction !== '0);
+endfunction: isNaN
+
+
+function bit isInf(float f);
+return((f.exponent === '1) && (f.fraction === '0));
+endfunction: isInf
+
+//************************************************************************************//
 
 endpackage
