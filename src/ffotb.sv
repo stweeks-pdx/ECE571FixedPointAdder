@@ -6,8 +6,8 @@ logic [TEST_N-1:0] testVal;
 logic [INDEX_WIDTH-1:0] index;
 logic valid;
 
-int unsigned j = 0;
-int unsigned max;
+longint unsigned j = 0;
+longint unsigned max;
 int ErrorSeen = 0;
 
 FindFirstOne DUT(testVal, valid, index);
