@@ -12,9 +12,3 @@ zero, infinity, or not-a-number respectively. The AddendA, AddendB, and Result a
 precision floating point number. Because it is packed, the user can either use the 32-bit number directly, or convert to a realshort using the provided package 
 interfaces. The floating point adder recieves a clock and reset for an internal control system, but the system is not designed to operate around a set calculation
 period but instead relies on handshaking for the computation.
-
-## Sub Components
-
-# Normalizer
-Barrel Shifter
-![Barrel Shifter Circuit](https://github.com/stweeks-pdx/ECE571IEEE754PointAdder/blob/feat/Docs/doc/BarrelShifter.jpg)
