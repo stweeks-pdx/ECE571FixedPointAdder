@@ -10,8 +10,6 @@ package floatingpointpkg;
 	logic [FRACBITS-1:0] frac;	
     } float;
 
-   // typedef float_t float;
-
     function float fpnumberfromcomponents(input bit sign, bit [EXPBITS-1:0] exponent, bit [FRACBITS-1:0] fraction);
 		fpnumberfromcomponents.sign = sign;
 		fpnumberfromcomponents.exp = exponent;

@@ -4,32 +4,32 @@ module top;
 	float f,S_T_F,nf,N_S_T_F;
 	shortreal s,ns;
 
-	task automatic TestFunc(input float_t float);	
+	task automatic TestFunc(input float f);	
 		logic Zero,Denorm,Nan,Inf;
 		logic FZero,FDenorm,FNan,FInf;
 
 		{Zero,Denorm,Nan,Inf} = '0;
-		if (float.exp === 0)
+		if (f.exp === 0)
 		begin
-			if (float.frac === 0)
+			if (f.frac === 0)
 				Zero = '1;
 			else
 				Denorm = '1;
 		end
-		else if (float.exp === '1)
+		else if (f.exp === '1)
 		begin
-			if (float.frac === 0)
+			if (f.frac === 0)
 				Inf = '1;
 			else
 				Nan = '1;
 		end
 
-		FZero = IsZero(float); FDenorm = IsDenorm(float); FNan = IsNaN(float); FInf = IsInf(float);
+		FZero = IsZero(f); FDenorm = IsDenorm(f); FNan = IsNaN(f); FInf = IsInf(f);
 
 		if ({Zero,Denorm,Nan,Inf} !== {FZero,FDenorm,FNan,FInf})
 		begin
 			error = 1;
-			$display("Input: %h",float);
+			$display("Input: %h",f);
 			$display("Expected Output: IsZero = %b, IsDenorm = %b, IsNaN = %b, IsInf = %b",Zero,Denorm,Nan,Inf);
 			$display("Actual Output: IsZero = %b, IsDenorm = %b, IsNaN = %b, IsInf = %b",FZero,FDenorm,FNan,FInf);
 		end
