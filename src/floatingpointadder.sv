@@ -9,7 +9,6 @@ module FloatingPointAdder(input float AddendA,
 			  output logic Nan);
 parameter VERSION = "0.1";
 
-<<<<<<< HEAD
 //*** TENTATIVE MODULE SKELETON ***//
 
 // *** Small ALU
