@@ -1,6 +1,8 @@
 import floatingpointpkg::*;
 module top;
-	int error;
+	int error, bug;
+	float f,S_T_F,nf,N_S_T_F;
+	shortreal s,ns;
 
 	task automatic TestFunc(input float_t float);	
 		logic Zero,Denorm,Nan,Inf;
@@ -36,6 +38,43 @@ module top;
 
 	initial
 	begin
+		//fpnumberfromcomponents
+		f	=	fpnumberfromcomponents(0,135,239206);
+		$display("f = %b\n", f);
+
+		nf	=	fpnumberfromcomponents(1,135,239206);
+		$display("nf = %b\n", nf);
+
+		//FloatToShortreal
+		s	=	FloatToShortreal(f);
+		$display("s = %f\n",s);
+
+
+		ns	=	FloatToShortreal(nf);
+		$display("ns = %f\n",ns);
+
+
+		//ShortrealToFloat
+
+		S_T_F	=	ShortrealToFloat(263.30);
+		$display("ShortrealToFloat = %b\n",S_T_F);
+
+		N_S_T_F	=	ShortrealToFloat(-263.30);
+		$display("ShortrealToFloat = %b\n",N_S_T_F);
+
+		//self checking for the first 3 functions
+
+		if(S_T_F !== f || N_S_T_F !== nf)
+			bug = '1;
+		else
+			bug = '0;
+
+		//DISPLAYFUNCTION
+		
+		DisplayFloatComponents(f);
+		DisplayFloatComponents(nf);
+		
+		////////////////////////////////
 		error = 0;
 		//Zero
 		TestFunc('0);
