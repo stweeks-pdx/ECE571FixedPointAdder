@@ -15,9 +15,12 @@ case(S)
 endcase
 end
 
+
 endmodule
 
 
+// TODO: Hard code to 23 bits
+// TODO: Split nibble FFO into module
 
 module FindFirstOne(word, valid, index); 
 parameter N = 32;
@@ -59,6 +62,7 @@ FourToOneMux preIdx1(subIndex[4], subIndex[5], subIndex[6], subIndex[7], idxSele
 // TODO: Modify final assignments when when parameterizing
 always_comb
 begin
+// Feeding nibbles comprised of the valid bits into the FFONibble circuit
 {idxSelect[2][0], idxSelect[0]} = subFFO(subV[3:0]); 
 {idxSelect[2][1], idxSelect[1]} = subFFO(subV[7:4]);
 

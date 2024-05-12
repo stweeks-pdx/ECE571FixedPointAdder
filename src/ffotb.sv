@@ -21,6 +21,7 @@ if (x == 0) i = 0;
 else
 	begin
 	v = 1'b1;
+// TODO: Add macros for TOP16MASK, TOP8MASK etc.	
 	if ((x & 32'hFFFF0000) == 0)
 		begin
 		n = n + 16;
@@ -67,6 +68,8 @@ for (j = 0; j <= max; j++)
 	#100 CheckResults(testVal);
 	if(j%2**27== 0) $display("j = %b", j);
 	end
+
+// TODO: Add directed tests for larger values or brute force; walking ones, one-hot, etc.
 
 if (ErrorSeen == 0) $display("*** NO ERRORS ***");
 else $display ("*** ERROR SEEN ***");
