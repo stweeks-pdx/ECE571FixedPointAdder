@@ -38,7 +38,7 @@ module FindFirstOne(word, valid, index);
 parameter N = 24;
 localparam DIFF_FROM_32 = 32 - N;
 localparam INDEX_WIDTH = $clog2(N + DIFF_FROM_32);
-localparam EMPTY_NIBBLES = $clog2(DIFF_FROM_32);
+localparam EMPTY_NIBBLES = DIFF_FROM_32 / 4;
 localparam NUM_NIBBLES = N / 4;
 
 input [N-1:0] word;
