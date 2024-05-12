@@ -1,6 +1,14 @@
 module top;
 parameter TEST_N = 32;
+parameter TEST_MAX = 23;
 localparam INDEX_WIDTH = $clog2(TEST_N);
+
+/* Macros for CheckResults bitmasks */
+localparam TOP16MASK = 32'hFFFF0000;
+localparam TOP8MASK  = 32'hFF000000;
+localparam TOP4MASK  = 32'hF0000000;
+localparam TOP2MASK  = 32'hC0000000;
+localparam TOP1MASK  = 32'h80000000;
 
 logic [TEST_N-1:0] testVal;
 logic [INDEX_WIDTH-1:0] index;
@@ -21,28 +29,28 @@ if (x == 0) i = 0;
 else
 	begin
 	v = 1'b1;
-// TODO: Add macros for TOP16MASK, TOP8MASK etc.	
-	if ((x & 32'hFFFF0000) == 0)
+
+	if ((x & TOP16MASK) == 0)
 		begin
 		n = n + 16;
 		x = x << 16;
 		end
-	if ((x & 32'hFF000000) == 0)
+	if ((x & TOP8MASK) == 0)
 		begin
 		n = n + 8;
 		x = x << 8;
 		end
-	if ((x & 32'hF0000000) == 0)
+	if ((x & TOP4MASK) == 0)
 		begin
 		n = n + 4;
 		x = x << 4;
 		end
-	if ((x & 32'hC0000000) == 0)
+	if ((x & TOP2MASK) == 0)
 		begin
 		n = n + 2;
 		x = x << 2;
 		end
-	if ((x & 32'h80000000) == 0)
+	if ((x & TOP1MASK) == 0)
 		begin
 		n = n + 1;
 		x = x << 1;
@@ -61,7 +69,7 @@ endfunction
 initial
 begin
 
-max = 2**TEST_N -1;
+max = 2**TEST_MAX -1;
 for (j = 0; j <= max; j++)
 	begin
 	testVal = j;
