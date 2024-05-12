@@ -1,7 +1,8 @@
 module top;
-parameter TEST_N = 32;
-parameter TEST_MAX = 23;
-localparam INDEX_WIDTH = $clog2(TEST_N);
+parameter TEST_N = 24;
+parameter TEST_MAX = 24;
+localparam DIFF_FROM_32 = 32 - TEST_N;
+localparam INDEX_WIDTH = $clog2(TEST_N+DIFF_FROM_32);
 
 /* Macros for CheckResults bitmasks */
 localparam TOP16MASK = 32'hFFFF0000;
@@ -20,7 +21,7 @@ int ErrorSeen = 0;
 
 FindFirstOne DUT(testVal, valid, index);
 
-function automatic void CheckResults(input [TEST_N-1:0] x);
+function automatic void CheckResults(input [2**INDEX_WIDTH-1:0] x);
 logic [INDEX_WIDTH-1:0] n, i;
 logic v = 1'b0;
 
@@ -60,7 +61,7 @@ else
 
 if (i !== index)
 	begin
-	$display("ERROR: input = %b_%b_%b_%b_%b_%b_%b_%b\texpected: v = %b n = %h\tobserved: v = %b n = %h",
+	$display("ERROR: input = %b_%b_%b_%b_%b_%b_%b_%b\texpected: v = %b n = %b\tobserved: v = %b n = %b",
 		 j[31:28], j[27:24], j[23:20], j[19:16], j[15:12], j[11:8], j[7:4], j[3:0], v, i, valid, index);
 	ErrorSeen = 1'b1;
 	end
@@ -73,7 +74,7 @@ max = 2**TEST_MAX -1;
 for (j = 0; j <= max; j++)
 	begin
 	testVal = j;
-	#100 CheckResults(testVal);
+	#100 CheckResults({{DIFF_FROM_32{1'b0}}, testVal});
 	if(j%2**27== 0) $display("j = %b", j);
 	end
 

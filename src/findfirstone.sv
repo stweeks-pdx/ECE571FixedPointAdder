@@ -18,12 +18,28 @@ end
 endmodule
 
 
-// TODO: Hard code to 23 bits
-// TODO: Split nibble FFO into module
+module NibbleFFO(nibble, inputValid, subIdx);
+// Takes in a 4 bit word and encodes it as a 2 bit index
+input [3:0] nibble;
+output logic inputValid;
+output logic [1:0] subIdx;
 
+assign inputValid = |nibble;
+assign subIdx[0] = nibble[3] | nibble[1] & ~nibble[2]; 
+assign subIdx[1] = nibble[3] | nibble[2];
+
+endmodule
+
+// TODO: Hard code to 24 bits
+// TODO: Split nibble FFO into module
 module FindFirstOne(word, valid, index); 
-parameter N = 32;
-localparam INDEX_WIDTH = $clog2(N);
+`define NIBBLE_TOP 4*i+3
+`define NIBBLE_BOT 4*i
+parameter N = 24;
+localparam DIFF_FROM_32 = 32 - N;
+localparam INDEX_WIDTH = $clog2(N + DIFF_FROM_32);
+localparam EMPTY_NIBBLES = $clog2(DIFF_FROM_32);
+localparam NUM_NIBBLES = N / 4;
 
 input [N-1:0] word;
 output logic valid;
@@ -32,47 +48,38 @@ output logic [INDEX_WIDTH-1:0] index;
 genvar i;
 
 // TODO: Determine how to parameterize everything below this point
-logic [7:0] subV;
-logic [1:0] subIndex [9:0];	// 2 extra are for non-parameterized tasks and modules
-logic [1:0] idxSelect [2:0];  // same as above
-
-function automatic bit [2:0] subFFO(input bit [3:0] subWord);
-// Takes in a 4 bit word and encodes it as a 2 bit index
-logic v;
-logic [1:0] subIdx;
-v = |subWord;
-subIdx[0] = subWord[3] | subWord[1] & ~subWord[2]; 
-subIdx[1] = subWord[3] | subWord[2];
-
-return {v, subIdx};
-endfunction
+logic [7:0] nibbleValid;
+logic [1:0] subIdx [5:0];	
+logic [1:0] groupIdx [1:0];
+logic [1:0] nibbleSelect [1:0];  
+//logic [1:0] topNibbleIdx, botNibbleIdx;
+logic topValid, botValid;
 
 generate
-for (i = 0; i < 8; i++)
-	begin: subVNet
-		assign {subV[i], subIndex[i]} = subFFO(word[4*i+3: 4*i]);
+for (i = 0; i < NUM_NIBBLES; i++)
+	begin: nibbleValidNet
+		NibbleFFO n(word[`NIBBLE_TOP:`NIBBLE_BOT], nibbleValid[i], subIdx[i]);
 	end
 endgenerate
 
 // TODO: Replace multiple modules with generate when parameterizing
-FourToOneMux preIdx0(subIndex[0], subIndex[1], subIndex[2], subIndex[3], idxSelect[0], subIndex[8]);
-FourToOneMux preIdx1(subIndex[4], subIndex[5], subIndex[6], subIndex[7], idxSelect[1], subIndex[9]);
+FourToOneMux firstIdx0(subIdx[0], subIdx[1], subIdx[2], subIdx[3], nibbleSelect[0], groupIdx[0]);
+FourToOneMux firstIdx1(subIdx[4], subIdx[5], 2'b0, 2'b0, nibbleSelect[1], groupIdx[1]);
+
+// Feeding nibbles comprised of the valid bits into the NibbleFFO module
+NibbleFFO botFFO(nibbleValid[3:0], botValid, nibbleSelect[0]);
+NibbleFFO topFFO({{EMPTY_NIBBLES{1'b0}}, nibbleValid[5:4]}, topValid, nibbleSelect[1]);
 
 // TODO: Modify final assignments when when parameterizing
 always_comb
 begin
-// Feeding nibbles comprised of the valid bits into the FFONibble circuit
-{idxSelect[2][0], idxSelect[0]} = subFFO(subV[3:0]); 
-{idxSelect[2][1], idxSelect[1]} = subFFO(subV[7:4]);
 
-index[1:0] = subIndex[9] | subIndex[8] & ~{2{idxSelect[2][1]}};
-index[2]   = subV[7] | subV[5] & ~subV[6]
-	   |(subV[3] | subV[1] & ~subV[2]) & ~idxSelect[2][1];
-index[3]   = subV[7] | subV[6]
-	   |(subV[3] | subV[2])& ~idxSelect[2][1];
-index[4]   = idxSelect[2][1];
-valid	   = idxSelect[2][1] | idxSelect[2][0];
+index[1:0] = groupIdx[1] | groupIdx[0] & ~{2{topValid}};
+index[2]   = nibbleValid[5] 
+	   |(nibbleValid[3] | nibbleValid[1] & ~nibbleValid[2]) & ~topValid;
+index[3]   = (nibbleValid[3] | nibbleValid[2])& ~topValid;
+index[4]   = topValid;
+valid	   = topValid | botValid;
 end
 
-endmodule   	
-
+endmodule  	
