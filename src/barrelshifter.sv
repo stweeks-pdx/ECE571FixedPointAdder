@@ -2,6 +2,9 @@
 module BarrelShifter(In, ShiftAmount, ShiftIn, Out);
 parameter N = 32;
 localparam nSel = $clog2(N);
+localparam MSB = N - 1;
+`define SHIFTSIZE(n) ((1 << (n))/2)
+
 input [N-1:0] In;
 input [nSel-1:0] ShiftAmount;
 input ShiftIn;
@@ -17,7 +20,7 @@ generate
     for(i = nSel; i > 0; i = i - 1)
     begin:MUX
       mux2to1 #(N) mux (.sel(ShiftAmount[i-1]), 
-                      .in1({muxOut[i][(N-1) - ((1 << i)/2):0], {((1 << i)/2){ShiftIn}}}), 
+                      .in1({muxOut[i][MSB - `SHIFTSIZE(i):0], {`SHIFTSIZE(i){ShiftIn}}}), 
                       .in0(muxOut[i]), 
                       .y(muxOut[i-1]));
     end
