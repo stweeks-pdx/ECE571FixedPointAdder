@@ -23,3 +23,7 @@ barrelshifter:
 expalu:
 	vlog -source -lint $(EXTRAFLAGS) expalu.sv expalutb.sv
 	vsim -c top
+
+findfirstone:
+	vlog -source -lint $(EXTRAFLAGS) findfirstone.sv ffotb.sv
+	vsim -c top
