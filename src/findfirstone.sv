@@ -30,8 +30,6 @@ assign subIdx[1] = nibble[3] | nibble[2];
 
 endmodule
 
-// TODO: Hard code to 24 bits
-// TODO: Split nibble FFO into module
 module FindFirstOne(word, valid, index); 
 `define NIBBLE_TOP 4*i+3
 `define NIBBLE_BOT 4*i
@@ -47,7 +45,6 @@ output logic [INDEX_WIDTH-1:0] index;
 
 genvar i;
 
-// TODO: Determine how to parameterize everything below this point
 logic [7:0] nibbleValid;
 logic [1:0] subIdx [5:0];	
 logic [1:0] groupIdx [1:0];
@@ -62,7 +59,6 @@ for (i = 0; i < NUM_NIBBLES; i++)
 	end
 endgenerate
 
-// TODO: Replace multiple modules with generate when parameterizing
 FourToOneMux firstIdx0(subIdx[0], subIdx[1], subIdx[2], subIdx[3], nibbleSelect[0], groupIdx[0]);
 FourToOneMux firstIdx1(subIdx[4], subIdx[5], 2'b0, 2'b0, nibbleSelect[1], groupIdx[1]);
 
@@ -70,7 +66,6 @@ FourToOneMux firstIdx1(subIdx[4], subIdx[5], 2'b0, 2'b0, nibbleSelect[1], groupI
 NibbleFFO botFFO(nibbleValid[3:0], botValid, nibbleSelect[0]);
 NibbleFFO topFFO({{EMPTY_NIBBLES{1'b0}}, nibbleValid[5:4]}, topValid, nibbleSelect[1]);
 
-// TODO: Modify final assignments when when parameterizing
 always_comb
 begin
 

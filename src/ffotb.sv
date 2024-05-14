@@ -10,6 +10,7 @@ localparam TOP8MASK  = 32'hFF000000;
 localparam TOP4MASK  = 32'hF0000000;
 localparam TOP2MASK  = 32'hC0000000;
 localparam TOP1MASK  = 32'h80000000;
+
 logic [TEST_N-1:0] testVal;
 logic [INDEX_WIDTH-1:0] index;
 logic valid;
@@ -78,6 +79,7 @@ for (j = 0; j <= max; j++)
 	end
 
 // TODO: Add directed tests for larger values or brute force; walking ones, one-hot, etc.
+
 if (ErrorSeen == 0) $display("*** NO ERRORS ***");
 else $display ("*** ERROR SEEN ***");
 $stop;
