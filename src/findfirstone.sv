@@ -30,6 +30,8 @@ assign subIdx[1] = nibble[3] | nibble[2];
 
 endmodule
 
+// TODO: Hard code to 24 bits
+// TODO: Split nibble FFO into module
 module FindFirstOne(word, valid, index); 
 `define NIBBLE_TOP 4*i+3
 `define NIBBLE_BOT 4*i
