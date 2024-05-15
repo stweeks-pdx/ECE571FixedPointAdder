@@ -19,3 +19,7 @@ floatpkg:
 barrelshifter:
 	vlog -source -lint $(EXTRAFLAGS) barrelshifter.sv barrelshiftertest.sv
 	vsim -c top
+
+findfirstone:
+	vlog -source -lint $(EXTRAFLAGS) findfirstone.sv ffotb.sv
+	vsim -c top

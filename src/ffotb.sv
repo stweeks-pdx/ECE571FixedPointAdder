@@ -1,7 +1,6 @@
-// TODO: Hardcode to 25 instead
 module top;
-parameter TEST_N = 24;
-parameter TEST_MAX = 24;
+parameter TEST_N = 25;
+parameter TEST_MAX = 25;
 localparam DIFF_FROM_32 = 32 - TEST_N;
 localparam INDEX_WIDTH = $clog2(TEST_N+DIFF_FROM_32);
 
@@ -66,6 +65,7 @@ if (i !== index)
 		 j[31:28], j[27:24], j[23:20], j[19:16], j[15:12], j[11:8], j[7:4], j[3:0], v, i, valid, index);
 	ErrorSeen = 1'b1;
 	end
+
 endfunction
 
 initial
@@ -77,6 +77,10 @@ for (j = 0; j <= max; j++)
 	testVal = j;
 	#100 CheckResults({{DIFF_FROM_32{1'b0}}, testVal});
 	if(j%2**27== 0) $display("j = %b", j);
+	`ifdef DEBUG
+		$display("Input = %b_%b_%b_%b_%b_%b_%b_%b\tObserved: v = %b n = %b",
+			 j[31:28], j[27:24], j[23:20], j[19:16], j[15:12], j[11:8], j[7:4], j[3:0], valid, index);
+	`endif	
 	end
 
 // TODO: Add directed tests for larger values or brute force; walking ones, one-hot, etc.
