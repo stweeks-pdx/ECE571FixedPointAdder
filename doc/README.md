@@ -27,4 +27,5 @@ the larger and this returns the difference result to ExpDiff.
 
 # Normalizer
 Barrel Shifter
+
 ![Barrel Shifter Circuit](BarrelShifter.jpg)
