@@ -2,7 +2,7 @@
 This directory includes all documentation surrounding the design choices, for how to run the system please refer to the master README at the root of this project.
 
 ## Block Diagram
-![Floating Point Adder Block Diagram](doc/FloatingPointAdder.jpg)
+![Floating Point Adder Block Diagram](./doc/FloatingPointAdder.jpg)
 
 ## Floating Point Interface
 For the floating point system the user is required to put their two addends on lines addendA and addendB, when the user wants to begin computation they will set
@@ -17,7 +17,7 @@ period but instead relies on handshaking for the computation.
 
 # Exponent ALU
 Exponent ALU
-![Exponent ALU](doc/<something>.jpg)
+![Exponent ALU](./doc/<something>.jpg)
 
 The Exponent ALU is responsible for detemring which exponent is passed forward and by what amount the system should do a right shift of the smaller exponents'
 mantissa. The exponent ALU takes in two 8-bit wide exponents and returns an 8-bit difference and set bit that are fed to the FSM. First the exponent ALU needs
@@ -27,4 +27,4 @@ the larger and this returns the difference result to ExpDiff.
 
 # Normalizer
 Barrel Shifter
-![Barrel Shifter Circuit](doc/BarrelShifter.jpg)
+![Barrel Shifter Circuit](./doc/BarrelShifter.jpg)
