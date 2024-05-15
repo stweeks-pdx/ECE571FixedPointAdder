@@ -2,7 +2,7 @@
 This directory includes all documentation surrounding the design choices, for how to run the system please refer to the master README at the root of this project.
 
 ## Block Diagram
-![Floating Point Adder Block Diagram](https://github.com/stweeks-pdx/ECE571IEEE754PointAdder/blob/main/doc/FloatingPointAdder.jpg)
+![Floating Point Adder Block Diagram](FloatingPointAdder.jpg)
 
 ## Floating Point Interface
 For the floating point system the user is required to put their two addends on lines addendA and addendB, when the user wants to begin computation they will set
@@ -15,6 +15,17 @@ period but instead relies on handshaking for the computation.
 
 ## Sub Components
 
+# Exponent ALU
+Exponent ALU
+![Exponent ALU](./doc/<something>.jpg)
+
+The Exponent ALU is responsible for detemring which exponent is passed forward and by what amount the system should do a right shift of the smaller exponents'
+mantissa. The exponent ALU takes in two 8-bit wide exponents and returns an 8-bit difference and set bit that are fed to the FSM. First the exponent ALU needs
+to de-bias the incoming exponents by subtracting 128 from them, it then will pass these to a comparison unit that sees if A >= B or A < B. If the former is true
+the ExpSet bit is set to 1, else it is set to 0. This set bit is also used to determine the subtraction operation where the smaller exponent is subtracted from
+the larger and this returns the difference result to ExpDiff.
+
 # Normalizer
 Barrel Shifter
-![Barrel Shifter Circuit](https://github.com/stweeks-pdx/ECE571IEEE754PointAdder/blob/feat/Docs/doc/BarrelShifter.jpg)
+
+![Barrel Shifter Circuit](BarrelShifter.jpg)

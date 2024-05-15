@@ -5,7 +5,7 @@ else
 	EXTRAFLAGS=
 endif
 
-.PHONY: build clean floatpkg barrelshifter
+.PHONY: build clean floatpkg barrelshifter expalu
 build:
 	vlib work
 
@@ -18,4 +18,8 @@ floatpkg:
 
 barrelshifter:
 	vlog -source -lint $(EXTRAFLAGS) barrelshifter.sv barrelshiftertest.sv
+	vsim -c top
+
+expalu:
+	vlog -source -lint $(EXTRAFLAGS) expalu.sv expalutb.sv
 	vsim -c top
