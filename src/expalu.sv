@@ -1,6 +1,6 @@
 module ExpALU(ExpA, ExpB, ExpSet, ExpDiff);
 parameter N = 8;
-localparam BIAS = (2**N)/2;
+localparam BIAS = ((2**N)/2) - 1;
 localparam MSB = N - 1;
 
 input [MSB:0] ExpA, ExpB;

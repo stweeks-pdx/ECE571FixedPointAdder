@@ -1,8 +1,8 @@
 module top;
 parameter tN = 8;
-localparam BIAS = (2**tN)/2;
+localparam BIAS = ((2**tN)/2) - 1;
 localparam MIN = (-1*BIAS) + 1;
-localparam MAX = BIAS - 1;
+localparam MAX = BIAS + 1;
 
 // DUT parameters
 logic [tN-1:0] ExpA, ExpB, ExpDiff;
