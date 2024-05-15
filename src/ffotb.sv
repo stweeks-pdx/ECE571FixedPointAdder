@@ -15,8 +15,8 @@ logic [TEST_N-1:0] testVal;
 logic [INDEX_WIDTH-1:0] index;
 logic valid;
 
-longint unsigned j = 0;
-longint unsigned max;
+int unsigned j = 0;
+int unsigned max;
 int ErrorSeen = 0;
 
 FindFirstOne DUT(testVal, valid, index);
@@ -76,7 +76,7 @@ for (j = 0; j <= max; j++)
 	begin
 	testVal = j;
 	#100 CheckResults({{DIFF_FROM_32{1'b0}}, testVal});
-	if(j%2**27== 0) $display("j = %b", j);
+	if(j%2**20== 0) $display("j = %b", j);
 	`ifdef DEBUG
 		$display("Input = %b_%b_%b_%b_%b_%b_%b_%b\tObserved: v = %b n = %b",
 			 j[31:28], j[27:24], j[23:20], j[19:16], j[15:12], j[11:8], j[7:4], j[3:0], valid, index);

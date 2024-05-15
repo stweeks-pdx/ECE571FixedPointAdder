@@ -52,7 +52,6 @@ logic [7:0] nibbleValid;
 logic [1:0] subIdx [6:0];	
 logic [1:0] groupIdx [1:0];
 logic [1:0] nibbleSelect [1:0];  
-//logic [1:0] topNibbleIdx, botNibbleIdx;
 logic topValid, botValid;
 
 assign wordWithEmpty = {{EMPTY_BITS{1'b0}}, word};
