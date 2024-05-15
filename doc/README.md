@@ -2,7 +2,7 @@
 This directory includes all documentation surrounding the design choices, for how to run the system please refer to the master README at the root of this project.
 
 ## Block Diagram
-![Floating Point Adder Block Diagram](./doc/FloatingPointAdder.jpg)
+![Floating Point Adder Block Diagram](FloatingPointAdder.jpg)
 
 ## Floating Point Interface
 For the floating point system the user is required to put their two addends on lines addendA and addendB, when the user wants to begin computation they will set
@@ -27,4 +27,4 @@ the larger and this returns the difference result to ExpDiff.
 
 # Normalizer
 Barrel Shifter
-![Barrel Shifter Circuit](./doc/BarrelShifter.jpg)
+![Barrel Shifter Circuit](BarrelShifter.jpg)
