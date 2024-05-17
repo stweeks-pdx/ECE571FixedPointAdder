@@ -24,10 +24,10 @@ assign fillIn = '0;
 /* Normalizing the mantissa */
 assign rightShiftMantissa = mantissa >> 1;
 
-FindFirstOne mantissaFFO(mantissa, valid, index);
+FindFirstOne #(.N(MANTISSA_N)) mantissaFFO(mantissa, valid, index);
 assign ShiftAmount = 24 - index; 	// Looking to normalize so first one is at 24th bit
 
-BarrelShifter shiftMantissa({fillIn, mantissa}, ShiftAmount, 1'b0, {fillOut, leftShiftMantissa});
+BarrelShifter #(.N(FILL_TO)) shiftMantissa({fillIn, mantissa}, ShiftAmount, 1'b0, {fillOut, leftShiftMantissa});
 
 // If control says to shift right (mantissa == 1X.XX...) then shift right, else shift left
 assign normedMantissa = (shiftRight) ? rightShiftMantissa: leftShiftMantissa;
