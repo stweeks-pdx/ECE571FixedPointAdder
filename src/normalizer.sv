@@ -4,6 +4,7 @@ parameter  EXP_N	= 8;
 parameter  FILL_TO	= 32;
 localparam MANTISSA_MSB = MANTISSA_N - 1;
 localparam EXP_MSB      = EXP_N - 1;
+localparam FILL_MSB	= FILL_TO - 1;
 localparam SHIFT_MSB    = $clog2(FILL_TO) - 1;
 
 input logic [MANTISSA_MSB:0]   mantissa;
@@ -14,7 +15,7 @@ output logic [MANTISSA_MSB:0]  normedMantissa;
 output logic [SHIFT_MSB:0]     index;		// Signal to control for index
 
 logic [MANTISSA_MSB:0] rightShiftMantissa, leftShiftMantissa;
-logic [FILL_TO-MANTISSA_N:0] fillIn, fillOut;
+logic [FILL_MSB - MANTISSA_N:0] fillIn, fillOut;
 logic valid;
 logic [SHIFT_MSB:0] ShiftAmount;
 logic [EXP_MSB:0]   incrementedExp;
