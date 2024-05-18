@@ -26,7 +26,7 @@ assign fillIn = '0;
 assign rightShiftMantissa = mantissa >> 1;
 
 FindFirstOne #(.N(MANTISSA_N)) mantissaFFO(mantissa, valid, index);
-assign ShiftAmount = 24 - index; 	// Looking to normalize so first one is at 24th bit
+assign ShiftAmount = 23 - index; 	// Looking to normalize so first one is at 23th bit
 
 BarrelShifter #(.N(FILL_TO)) shiftMantissa({fillIn, mantissa}, ShiftAmount, 1'b0, {fillOut, leftShiftMantissa});
 
