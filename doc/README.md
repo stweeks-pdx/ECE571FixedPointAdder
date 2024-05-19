@@ -17,7 +17,8 @@ period but instead relies on handshaking for the computation.
 
 # Exponent ALU
 Exponent ALU
-![Exponent ALU](./doc/<something>.jpg)
+
+![Exponent ALU](ExponentALU.jpg)
 
 The Exponent ALU is responsible for detemring which exponent is passed forward and by what amount the system should do a right shift of the smaller exponents'
 mantissa. The exponent ALU takes in two 8-bit wide exponents and returns an 8-bit difference and set bit that are fed to the FSM. First the exponent ALU needs
