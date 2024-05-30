@@ -29,4 +29,5 @@ findfirstone:
 	vsim -c top
 
 bigalu:
-	vlog -source -lint $(EXTRAFLAGS) bigalu.sv
+	vlog -source -lint $(EXTRAFLAGS) bigalu.sv bigalutb.sv bigalu-kgm.sv fulladder.sv
+	vsim -c top
