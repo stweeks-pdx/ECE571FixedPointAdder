@@ -1,4 +1,4 @@
-module Normalizer(mantissa, exp, shiftRight, normedExp, normedMantissa, index);
+module Normalizer(mantissa, exp, shiftRight, normedExp, normedMantissa, index, valid);
 parameter  MANTISSA_N   = 25;
 parameter  EXP_N	= 8;
 parameter  FILL_TO	= 32;
@@ -13,10 +13,10 @@ input logic		       shiftRight;	// Signal for control if right shift is needed
 output logic [EXP_MSB:0]       normedExp;
 output logic [MANTISSA_MSB:0]  normedMantissa;
 output logic [SHIFT_MSB:0]     index;		// Signal to control for index
+output logic		       valid;
 
 logic [MANTISSA_MSB:0] rightShiftMantissa, leftShiftMantissa;
 logic [FILL_MSB - MANTISSA_N:0] fillIn, fillOut;
-logic valid;
 logic [SHIFT_MSB:0] ShiftAmount;
 logic [EXP_MSB:0]   incrementedExp;
 
@@ -35,6 +35,15 @@ assign normedMantissa = (shiftRight) ? rightShiftMantissa: leftShiftMantissa;
 
 
 /* Normalizing the exponent */
-assign normedExp = (shiftRight) ? exp - 1: exp + ShiftAmount;
-
+always_comb
+	begin
+	if (shiftRight)
+		normedExp = exp + 1;
+	// If no 1s found, then exp remains the same?
+	// TODO: Double check if this is a correct assumption
+	else if (~valid)
+		normedExp = exp;
+	else
+		normedExp = exp - ShiftAmount;
+	end
 endmodule
