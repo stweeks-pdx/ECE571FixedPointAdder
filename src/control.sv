@@ -55,8 +55,8 @@ module Control #(
 	//enum logic [2:0] {IDLE,DISSR,ENSRGT,ENSRLT,SR,SL,NOSHIFT} State, NextState;
 	StateType State,NextState;
 					
-	localparam INDEXCARRY = 25;
-	localparam INDEXONE = 24;
+	localparam INDEXCARRY = 24;
+	localparam INDEXONE = 23;
 	localparam NBITS = $clog2(MANTISSABITS);
 	logic [NBITS-1:0] MBITSEN = 5'b10111; // MBITSEN = 23;
 	
@@ -91,6 +91,8 @@ module Control #(
 					NextState = NOSHIFT;
 				else if (FFOValid && FFOIndex < INDEXONE)
 					NextState = SL;
+				else if (!FFOValid)
+					NextState = NOSHIFT;
 				else
 					NextState = DISSR;
 			end
@@ -102,6 +104,8 @@ module Control #(
 					NextState = NOSHIFT;
 				else if (FFOValid && FFOIndex < INDEXONE)
 					NextState = SL;
+				else if (!FFOValid)
+					NextState = NOSHIFT;
 				else
 					NextState = ENSRGT;
 			end
@@ -113,39 +117,41 @@ module Control #(
 					NextState = NOSHIFT;
 				else if (FFOValid && FFOIndex < INDEXONE)
 					NextState = SL;
+				else if (!FFOValid)
+					NextState = NOSHIFT;
 				else
 					NextState = ENSRLT;
 				end
 				
 		SR: begin
-				if (Out[INDEXONE]=='0)
+				if (Out[INDEXCARRY]=='0)
 						NextState = IDLE;
-					else if (Out[INDEXONE])
+					else if (Out[INDEXCARRY])
 						NextState = ROUND;
 					else
 						NextState = SR;
 				end
 				
 		SL: begin
-				if (Out[INDEXONE]=='0)
+				if (Out[INDEXCARRY]=='0)
 						NextState = IDLE;
-					else if (Out[INDEXONE])
+					else if (Out[INDEXCARRY])
 						NextState = ROUND;
 					else
 						NextState = SL;			
 				end
 				
 		NOSHIFT: begin
-					if (Out[INDEXONE]=='0)
+					if (Out[INDEXCARRY]=='0)
 						NextState = IDLE;
-					else if (Out[INDEXONE])
+					else if (Out[INDEXCARRY])
 						NextState = ROUND;
 					else
 						NextState = NOSHIFT;		
 				end
 				
 		ROUND: begin
-					if (Out[INDEXONE]=='0)
+					if (Out[INDEXCARRY]=='0)
 						NextState = IDLE;
 					else
 						NextState = ROUND;

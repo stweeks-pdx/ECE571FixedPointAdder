@@ -50,23 +50,34 @@ module top;
 		Reset = '1;
 		repeat(2) @(negedge Clock);
 		Reset = '0;
-		
+
 		//a>b, FFO index = 23,round
 		Initiate('1,'1,{EXPBITS/2{2'b01}});
 		Normalize('0,'1,5'b10111);               
 		Rounding({2'b10,{MANTISSABITS{1'b0}}});
 		Rounding({2'b01,{MANTISSABITS{1'b0}}});
 		
-		//a=b, FFO index = 25,noround
+		//a=b, FFO index = 24,noround
 		Initiate('1,'1,{EXPBITS/2{2'b00}});
-		Normalize('0,'1,5'b11001);               
+		Normalize('0,'1,5'b11000);               
 		Rounding({2'b00,{MANTISSABITS{1'b1}}});
 		
-		//a<b, FFO index = 24,round
+		//a<b, FFO index = 22,round
 		Initiate('1,'0,{EXPBITS/2{2'b01}});
-		Normalize('0,'1,5'b11000);               
+		Normalize('0,'1,5'b10110);               
 		Rounding({2'b10,{MANTISSABITS{1'b1}}});
 		Rounding({2'b01,{MANTISSABITS{1'b1}}});
+		
+		//a=b, FFO index = 23,noround
+		Initiate('1,'1,{EXPBITS/2{2'b00}});
+		Normalize('0,'1,5'b10111);               
+		Rounding({2'b00,{MANTISSABITS{1'b1}}});
+		
+		//a=b, FFOValid=0, FFO index = 23,noround 
+		Initiate('1,'1,{EXPBITS/2{2'b00}});
+		Normalize('0,'0,5'b10111);               
+		Rounding({2'b00,{MANTISSABITS{1'b1}}});
+	
 		
 		repeat(2) @(negedge Clock);	
 		
