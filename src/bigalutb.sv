@@ -4,6 +4,7 @@ parameter TEST_N = 24;
 logic [TEST_N-1:0] x, xKGM;
 logic [TEST_N-1:0] y, yKGM;
 logic [TEST_N-1:0] result, expected;
+logic [TEST_N:0] resultKGM;
 logic ccn, ccz, ccv, ccc, exn, exz, exv, exc;
 logic signA, signB, sub;
 
@@ -12,7 +13,7 @@ longint unsigned i;
 longint unsigned MAX;
 int ErrorsSeen = 0;
 
-AddSub8Bit  #(.N(TEST_N)) KGM(expected, xKGM, yKGM, exn, exz, exv, exc, sub);
+AddSub8Bit  #(.N(TEST_N+1)) KGM(resultKGM, {signA, xKGM}, {signB, yKGM}, exn, exz, exv, exc, sub);
 bigalu	    #(.N(TEST_N)) DUT(x, y, signA, signB, result, ccc, ccz, ccv, ccn);
 
 class RandVector; // Random input, without replacement, for testing TEST_N > 8
@@ -22,6 +23,7 @@ endclass
 RandVector Random = new;
 
 function automatic void CheckResults();
+	expected = (exn) ? resultKGM * -1 : resultKGM;
 	if ({result, ccn, ccz, ccv, ccc} !== {expected, exn, exz, exv, exc})
 		begin
 		$display("ERROR:\n\tInput: (%s%d) + (%s%d)",(signA) ? "-" : "+", x,(signB) ? "-" : "+", y); 
