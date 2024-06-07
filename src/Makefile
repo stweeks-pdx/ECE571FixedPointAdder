@@ -5,7 +5,7 @@ else
 	EXTRAFLAGS=
 endif
 
-.PHONY: build clean floatpkg barrelshifter expalu bigalu findfirstone normalizer
+.PHONY: build clean floatpkg barrelshifter expalu bigalu findfirstone normalizer round
 
 build:
 	vlib work
@@ -28,6 +28,10 @@ expalu:
 findfirstone:
 	vlog -source -lint $(EXTRAFLAGS) findfirstone.sv ffotb.sv
 	vsim -c top
+
+round:
+	vlog -source -lint $(EXTRAFLAGS) round.sv roundtb.sv
+  vsim -c top
 
 normalizer:
 	vlog -source -lint $(EXTRAFLAGS) normalizer.sv barrelshifter.sv findfirstone.sv normalizertb.sv
