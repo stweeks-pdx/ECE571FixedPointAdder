@@ -27,3 +27,7 @@ expalu:
 findfirstone:
 	vlog -source -lint $(EXTRAFLAGS) findfirstone.sv ffotb.sv
 	vsim -c top
+
+round:
+	vlog -source -lint $(EXTRAFLAGS) round.sv roundtb.sv
+	vsim -c top

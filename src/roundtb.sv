@@ -12,7 +12,7 @@ int ErrorSeen = 0;
 
 RoundNearestEven #(TEST_N) DUT(TestOut, TestIn, TestRound, TestSticky);
 
-function automatic void CompareResults(input logic [MSB:0] Observed, Expected);
+function automatic void PrintIfError(input logic [MSB:0] Observed, Expected);
 
 if (Observed !== Expected)
 	begin 
@@ -32,17 +32,17 @@ CheckVal = {TestIn, TestRound, TestSticky};
 if ((CheckVal % 4) > 2)
 	begin
 	Expected = TestIn + 1;
-	#10 CompareResults(TestOut, Expected);
+	#10 PrintIfError(TestOut, Expected);
 	end
 else if ((CheckVal % 4) < 2)
 	begin
 	Expected = TestIn;
-	#10 CompareResults(TestOut, Expected);
+	#10 PrintIfError(TestOut, Expected);
 	end
 else
 	begin
 	Expected = (TestIn[0]) ? TestIn + 1 : TestIn;
-	#10 CompareResults(TestOut, Expected);
+	#10 PrintIfError(TestOut, Expected);
 	end
 
 endtask
