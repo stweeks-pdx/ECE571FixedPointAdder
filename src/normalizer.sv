@@ -26,7 +26,7 @@ assign fillIn = '0;
 assign rightShiftMantissa = mantissa >> 1;
 
 FindFirstOne #(.N(MANTISSA_N)) mantissaFFO(mantissa, valid, index);
-assign ShiftAmount = 23 - index; 	// Looking to normalize so first one is at 23th bit
+assign ShiftAmount = (valid) ? (23 - index):0; 	// Looking to normalize so first one is at 23th bit
 
 BarrelShifter #(.N(FILL_TO)) shiftMantissa({fillIn, mantissa}, ShiftAmount, 1'b0, {fillOut, leftShiftMantissa});
 
@@ -35,15 +35,6 @@ assign normedMantissa = (shiftRight) ? rightShiftMantissa: leftShiftMantissa;
 
 
 /* Normalizing the exponent */
-always_comb
-	begin
-	if (shiftRight)
-		normedExp = exp + 1;
-	// If no 1s found, then exp remains the same?
-	// TODO: Double check if this is a correct assumption
-	else if (~valid)
-		normedExp = exp;
-	else
-		normedExp = exp - ShiftAmount;
-	end
+assign normedExp = (shiftRight) ? exp + 1 : exp - ShiftAmount;
+
 endmodule
