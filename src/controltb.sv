@@ -56,7 +56,7 @@ module top;
 		Normalize('0,'1,5'b10111);               
 		Rounding({2'b10,{MANTISSABITS{1'b0}}});
 		Rounding({2'b01,{MANTISSABITS{1'b0}}});
-		
+
 		//a=b, FFO index = 24,noround
 		Initiate('1,'1,{EXPBITS/2{2'b00}});
 		Normalize('0,'1,5'b11000);               
@@ -68,6 +68,7 @@ module top;
 		Rounding({2'b10,{MANTISSABITS{1'b1}}});
 		Rounding({2'b01,{MANTISSABITS{1'b1}}});
 		
+		//equal without additional rounding
 		//a=b, FFO index = 23,noround
 		Initiate('1,'1,{EXPBITS/2{2'b00}});
 		Normalize('0,'1,5'b10111);               
@@ -76,8 +77,119 @@ module top;
 		//a=b, FFOValid=0, FFO index = 23,noround 
 		Initiate('1,'1,{EXPBITS/2{2'b00}});
 		Normalize('0,'0,5'b10111);               
+		Rounding({2'b00,{MANTISSABITS{1'b0}}});
+		
+		//a=b, FFO index = 21,noround
+		Initiate('1,'1,{EXPBITS/2{2'b00}});
+		Normalize('0,'1,5'b10101);               
 		Rounding({2'b00,{MANTISSABITS{1'b1}}});
-	
+		
+		//equal with additional rounding
+		//a=b, FFO index = 23,noround
+		Initiate('1,'1,{EXPBITS/2{2'b00}});
+		Normalize('0,'1,5'b10111);               
+		Rounding({2'b10,{MANTISSABITS{1'b1}}});
+		Rounding({2'b01,{MANTISSABITS{1'b1}}});
+		
+		//a=b, FFOValid=0, FFO index = 23,noround 
+		Initiate('1,'1,{EXPBITS/2{2'b00}});
+		Normalize('0,'0,5'b10111);               
+		Rounding({2'b10,{MANTISSABITS{1'b1}}});
+		Rounding({2'b01,{MANTISSABITS{1'b1}}});
+		
+		//a=b, FFO index = 21,noround
+		Initiate('1,'1,{EXPBITS/2{2'b00}});
+		Normalize('0,'1,5'b10101);               
+		Rounding({2'b10,{MANTISSABITS{1'b1}}});
+		Rounding({2'b01,{MANTISSABITS{1'b1}}});
+		
+		//a=b, FFO index = 24,noround
+		Initiate('1,'1,{EXPBITS/2{2'b00}});
+		Normalize('0,'1,5'b11000);  
+		Rounding({2'b10,{MANTISSABITS{1'b1}}});
+		Rounding({2'b00,{MANTISSABITS{1'b1}}});
+		
+		//greater than with additional rounding
+		//a>b, FFO index = 24,round
+		Initiate('1,'1,{EXPBITS/2{2'b01}});
+		Normalize('0,'1,5'b11000);               
+		Rounding({2'b10,{MANTISSABITS{1'b0}}});
+		Rounding({2'b01,{MANTISSABITS{1'b0}}});
+		
+		//a>b, FFO index = 23,round
+		Initiate('1,'1,{EXPBITS/2{2'b01}});
+		Normalize('0,'0,5'b10111);               
+		Rounding({2'b10,{MANTISSABITS{1'b0}}});
+		Rounding({2'b01,{MANTISSABITS{1'b0}}});
+		
+		//a>b, FFO index = 20,round
+		Initiate('1,'1,{EXPBITS/2{2'b01}});
+		Normalize('0,'1,5'b10100);               
+		Rounding({2'b10,{MANTISSABITS{1'b0}}});
+		Rounding({2'b01,{MANTISSABITS{1'b0}}});
+		
+		//greater than without additional rounding
+		//a>b, FFO index = 23,round
+		Initiate('1,'1,{EXPBITS/2{2'b01}});
+		Normalize('0,'1,5'b10111);               
+		Rounding({2'b01,{MANTISSABITS{1'b0}}});
+		
+		//a>b, FFO index = 24,round
+		Initiate('1,'1,{EXPBITS/2{2'b01}});
+		Normalize('0,'1,5'b11000);               
+		Rounding({2'b01,{MANTISSABITS{1'b0}}});
+		
+		//a>b, FFO index = 23,round
+		Initiate('1,'1,{EXPBITS/2{2'b01}});
+		Normalize('0,'0,5'b10111);               
+		Rounding({2'b01,{MANTISSABITS{1'b0}}});
+		
+		//a>b, FFO index = 20,round
+		Initiate('1,'1,{EXPBITS/2{2'b01}});
+		Normalize('0,'1,5'b10100);               
+		Rounding({2'b01,{MANTISSABITS{1'b0}}});
+		
+		//less than with additional rounding
+		//a<b, FFO index = 23,round
+		Initiate('1,'0,{EXPBITS/2{2'b01}});
+		Normalize('0,'1,5'b10111);               
+		Rounding({2'b10,{MANTISSABITS{1'b1}}});
+		Rounding({2'b11,{MANTISSABITS{1'b1}}});
+		Rounding({2'b01,{MANTISSABITS{1'b1}}});
+		
+		//a<b, FFO index = 24,round
+		Initiate('1,'0,{EXPBITS/2{2'b01}});
+		Normalize('0,'0,5'b11000);               
+		Rounding({2'b10,{MANTISSABITS{1'b1}}});
+		Rounding({2'b01,{MANTISSABITS{1'b1}}});
+		
+		//a<b, FFO index = 24,round
+		Initiate('1,'0,{EXPBITS/2{2'b01}});
+		Normalize('0,'1,5'b11000);               
+		Rounding({2'b10,{MANTISSABITS{1'b1}}});
+		Rounding({2'b11,{MANTISSABITS{1'b1}}});
+		Rounding({2'b01,{MANTISSABITS{1'b1}}});
+		
+		//less than with no additional rounding
+		//a<b, FFO index = 23,round
+		Initiate('1,'0,{EXPBITS/2{2'b01}});
+		Normalize('0,'1,5'b10111);               
+		Rounding({2'b01,{MANTISSABITS{1'b1}}});
+		
+		//a<b, FFO index = 24,round
+		Initiate('1,'0,{EXPBITS/2{2'b01}});
+		Normalize('0,'0,5'b11000);               
+		Rounding({2'b01,{MANTISSABITS{1'b1}}});
+		
+		//a<b, FFO index = 24,round
+		Initiate('1,'0,{EXPBITS/2{2'b01}});
+		Normalize('0,'1,5'b11000);               
+		Rounding({2'b01,{MANTISSABITS{1'b1}}});
+		
+		//a<b, FFO index = 22,round
+		Initiate('1,'0,{EXPBITS/2{2'b01}});
+		Normalize('0,'1,5'b10110);               
+		Rounding({2'b01,{MANTISSABITS{1'b1}}});
 		
 		repeat(2) @(negedge Clock);	
 		
