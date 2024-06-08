@@ -36,7 +36,7 @@ always @(posedge Clock) expToPreNorm <= expToPipe0;
 // Outputs: smaller mantissa to Pre-add Shifter
 assign mantSmall = (SelSRMuxL) ? AddendA.frac : AddendB.frac;
 assign signSmall = (SelSRMuxL) ? AddendA.sign : AddendB.sign;
-always @(posedge Clock) mantToShiftRight <= {1'b1, mantSmall};
+always @(posedge Clock) mantToShiftRight <= {1'b1, mantSmall}; // Now need 24 bits for mant; appending implied 1
 always @(posedge Clock) signAtoALU <= signSmall; 
 
 // *** Large Mantissa MUX
@@ -47,7 +47,7 @@ always @(posedge Clock) signAtoALU <= signSmall;
 // Outputs: larger mantissa to Big ALU
 assign mantLarge = (SelSRMuxG) ? AddendA.frac : AddendB.frac;
 assign signLarge = (SelSRMuxG) ? AddendA.sign : AddendB.sign;
-always @(posedge Clock) mantBtoALU <= {1'b1, mantLarge};
+always @(posedge Clock) mantBtoALU <= {1'b1, mantLarge};      // Now need 24 bits for mant; appending implied 1
 always @(posedge Clock) signBtoALU <= signLarge;
 
 // *** Pre-add Shifter
@@ -74,7 +74,7 @@ bigalu BigALU(mantAtoALU, mantBtoALU, signAtoALU, signBtoALU, mantSum, ccc, ccz,
 // 	   sumShiftSelect from Control
 //
 // Outputs: un-normalized mantissa to Normalizing Shifter
-assign mantToPipe1 = (SelManMuxR) ? mantRounded : mantSum;
+assign mantToPipe1 = (SelManMuxR) ? mantRounded : {ccc, mantSum}; // Now need 25 bits for mant
 assign signToPipe1 = (SelManMuxR) ? signRounded : ccn;
 always @(posedge Clock) mantToNorm <= mantToPipe1;
 always @(posedge Clock) signToNorm <= signToPipe1;
