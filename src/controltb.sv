@@ -12,12 +12,12 @@ module top;
 	wire SelExpMux,SelSRMuxL,SelSRMuxG,ShiftRightEnable;
 	wire [NBITS-1:0] ShiftRightAmount,ShiftAmount;
 	wire SREn,SLEn,NoShift,IncrEn,DecrEn;
-	wire SelExpMuxR,SelManMuxR;
+	wire SelExpMuxR,SelManMuxR,Result;
 	
 	localparam DUTYCYCLE = 10;
 	
-	Control #(EXPBITS,MANTISSABITS) DUT (Go,Clock,Reset,ExpSet,ExpDiff,FFOValid,FFOIndex,Out,SelExpMux,SelSRMuxL,SelSRMuxG,ShiftRightEnable,ShiftRightAmount,SREn,SLEn,NoShift,IncrEn,DecrEn,ShiftAmount,SelExpMuxR, SelManMuxR);
-	bind Control ControlAssertions #(EXPBITS,MANTISSABITS) DUTA (Go,Clock,Reset,ExpSet,ExpDiff,FFOValid,FFOIndex,Out,SelExpMux,SelSRMuxL,SelSRMuxG,ShiftRightEnable,ShiftRightAmount,SREn,SLEn,NoShift,IncrEn,DecrEn,ShiftAmount,SelExpMuxR,SelManMuxR,State);
+	Control #(EXPBITS,MANTISSABITS) DUT (Go,Clock,Reset,ExpSet,ExpDiff,FFOValid,FFOIndex,Out,SelExpMux,SelSRMuxL,SelSRMuxG,ShiftRightEnable,ShiftRightAmount,SREn,SLEn,NoShift,IncrEn,DecrEn,ShiftAmount,SelExpMuxR, SelManMuxR,Result);
+	bind Control ControlAssertions #(EXPBITS,MANTISSABITS) DUTA (Go,Clock,Reset,ExpSet,ExpDiff,FFOValid,FFOIndex,Out,SelExpMux,SelSRMuxL,SelSRMuxG,ShiftRightEnable,ShiftRightAmount,SREn,SLEn,NoShift,IncrEn,DecrEn,ShiftAmount,SelExpMuxR,SelManMuxR,Result,State);
 	
 	task Initiate(input logic ready,set,input logic [EXPBITS-1:0] diff);
 		@(negedge Clock)
@@ -36,6 +36,7 @@ module top;
 	task Rounding(input logic [MANTISSABITS+1:0] out);
 		@(negedge Clock);
 		Out = out;
+		@(negedge Clock);
 	endtask
 
 
@@ -56,11 +57,13 @@ module top;
 		Normalize('0,'1,5'b10111);               
 		Rounding({2'b10,{MANTISSABITS{1'b0}}});
 		Rounding({2'b01,{MANTISSABITS{1'b0}}});
+		repeat (4) @ (negedge Clock);
 
 		//a=b, FFO index = 24,noround
 		Initiate('1,'1,{EXPBITS/2{2'b00}});
 		Normalize('0,'1,5'b11000);               
 		Rounding({2'b00,{MANTISSABITS{1'b1}}});
+		repeat (4) @ (negedge Clock);
 		
 		//a<b, FFO index = 22,round
 		Initiate('1,'0,{EXPBITS/2{2'b01}});
@@ -78,6 +81,7 @@ module top;
 		Initiate('1,'1,{EXPBITS/2{2'b00}});
 		Normalize('0,'0,5'b10111);               
 		Rounding({2'b00,{MANTISSABITS{1'b0}}});
+		repeat (3) @ (negedge Clock);
 		
 		//a=b, FFO index = 21,noround
 		Initiate('1,'1,{EXPBITS/2{2'b00}});
@@ -96,6 +100,8 @@ module top;
 		Normalize('0,'0,5'b10111);               
 		Rounding({2'b10,{MANTISSABITS{1'b1}}});
 		Rounding({2'b01,{MANTISSABITS{1'b1}}});
+		repeat (3) @ (negedge Clock);
+
 		
 		//a=b, FFO index = 21,noround
 		Initiate('1,'1,{EXPBITS/2{2'b00}});
@@ -156,7 +162,8 @@ module top;
 		Rounding({2'b10,{MANTISSABITS{1'b1}}});
 		Rounding({2'b11,{MANTISSABITS{1'b1}}});
 		Rounding({2'b01,{MANTISSABITS{1'b1}}});
-		
+		repeat (3) @ (negedge Clock);
+	
 		//a<b, FFO index = 24,round
 		Initiate('1,'0,{EXPBITS/2{2'b01}});
 		Normalize('0,'0,5'b11000);               
@@ -180,6 +187,7 @@ module top;
 		Initiate('1,'0,{EXPBITS/2{2'b01}});
 		Normalize('0,'0,5'b11000);               
 		Rounding({2'b01,{MANTISSABITS{1'b1}}});
+		repeat (3) @ (negedge Clock);
 		
 		//a<b, FFO index = 24,round
 		Initiate('1,'0,{EXPBITS/2{2'b01}});
@@ -191,6 +199,9 @@ module top;
 		Normalize('0,'1,5'b10110);               
 		Rounding({2'b01,{MANTISSABITS{1'b1}}});
 		
+		//Finish
+		Initiate('0,'0,{EXPBITS/2{2'b00}});
+	
 		repeat(2) @(negedge Clock);	
 		
 	$finish;

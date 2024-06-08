@@ -1,5 +1,5 @@
 package controlpkg;
-typedef enum logic [2:0] {IDLE,DISSR,ENSRGT,ENSRLT,SR,SL,NOSHIFT,ROUND} StateType;
+typedef enum logic [3:0] {IDLE,DISSR,ENSRGT,ENSRLT,SR,SL,NOSHIFT,ROUND,RESULT} StateType;
 endpackage
 
 /**************************
@@ -40,7 +40,8 @@ module Control #(
 	//inputs to normalize 
 	output logic SREn,SLEn,NoShift,IncrEn,DecrEn,
 	output logic [$clog2(MANTISSABITS)-1:0] ShiftAmount,
-	output logic SelExpMuxR, SelManMuxR );
+	output logic SelExpMuxR, SelManMuxR,
+	output logic Result );
 
 	import controlpkg::*;
 
@@ -59,6 +60,17 @@ module Control #(
 	localparam INDEXONE = 23;
 	localparam NBITS = $clog2(MANTISSABITS);
 	logic [NBITS-1:0] MBITSEN = 5'b10111; // MBITSEN = 23;
+	logic FlagResult;
+
+	always_ff @ (posedge Clock)
+	begin
+		if (Reset)
+			Result <= '0;
+		else if (FlagResult)
+			Result <= '1;
+		else if (Go)
+			Result <= '0;
+	end
 	
 	always_ff @ (posedge Clock)
 	begin
@@ -87,12 +99,10 @@ module Control #(
 		DISSR: begin
 				if (FFOValid && FFOIndex == INDEXCARRY)
 					NextState = SR;
-				else if (FFOValid && FFOIndex == INDEXONE)
+				else if ((FFOValid && FFOIndex == INDEXONE) || (!FFOValid))
 					NextState = NOSHIFT;
 				else if (FFOValid && FFOIndex < INDEXONE)
 					NextState = SL;
-				else if (!FFOValid)
-					NextState = NOSHIFT;
 				else
 					NextState = DISSR;
 			end
@@ -100,12 +110,10 @@ module Control #(
 		ENSRGT: begin
 				if (FFOValid && FFOIndex == INDEXCARRY)
 					NextState = SR;
-				else if (FFOValid && FFOIndex == INDEXONE)
+				else if ((FFOValid && FFOIndex == INDEXONE) || (!FFOValid))
 					NextState = NOSHIFT;
 				else if (FFOValid && FFOIndex < INDEXONE)
 					NextState = SL;
-				else if (!FFOValid)
-					NextState = NOSHIFT;
 				else
 					NextState = ENSRGT;
 			end
@@ -113,19 +121,17 @@ module Control #(
 		ENSRLT: begin
 				if (FFOValid && FFOIndex == INDEXCARRY)
 					NextState = SR;
-				else if (FFOValid && FFOIndex == INDEXONE)
+				else if ((FFOValid && FFOIndex == INDEXONE) || (!FFOValid))
 					NextState = NOSHIFT;
 				else if (FFOValid && FFOIndex < INDEXONE)
 					NextState = SL;
-				else if (!FFOValid)
-					NextState = NOSHIFT;
 				else
 					NextState = ENSRLT;
 				end
 				
 		SR: begin
 				if (Out[INDEXCARRY]=='0)
-						NextState = IDLE;
+						NextState = RESULT;
 					else if (Out[INDEXCARRY])
 						NextState = ROUND;
 					else
@@ -134,7 +140,7 @@ module Control #(
 				
 		SL: begin
 				if (Out[INDEXCARRY]=='0)
-						NextState = IDLE;
+						NextState = RESULT;
 					else if (Out[INDEXCARRY])
 						NextState = ROUND;
 					else
@@ -143,7 +149,7 @@ module Control #(
 				
 		NOSHIFT: begin
 					if (Out[INDEXCARRY]=='0)
-						NextState = IDLE;
+						NextState = RESULT;
 					else if (Out[INDEXCARRY])
 						NextState = ROUND;
 					else
@@ -152,10 +158,13 @@ module Control #(
 				
 		ROUND: begin
 					if (Out[INDEXCARRY]=='0)
-						NextState = IDLE;
+						NextState = RESULT;
 					else
 						NextState = ROUND;
 				end
+		RESULT:begin
+			NextState = IDLE;
+			end
 		endcase
 	end
 	
@@ -167,6 +176,7 @@ module Control #(
 		{SREn,SLEn,NoShift,ShiftAmount} = '0;
 		{IncrEn,DecrEn} = '0;
 		{SelExpMuxR,SelManMuxR} = '0;
+		FlagResult = '0;
 		
 		unique case (State)
 		IDLE: begin
@@ -208,6 +218,7 @@ module Control #(
 				SelExpMuxR = '1; SelManMuxR = '1;
 				SREn = '1; IncrEn = '1; 
 				end
+		RESULT: FlagResult = '1;
 		endcase
 	end 
 	

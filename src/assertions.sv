@@ -11,7 +11,7 @@ module ControlAssertions #(
 	input logic [$clog2(MANTISSABITS)-1:0] ShiftRightAmount,
 	input logic SREn,SLEn,NoShift,IncrEn,DecrEn,
 	input logic [$clog2(MANTISSABITS)-1:0] ShiftAmount,
-	input logic SelExpMuxR, SelManMuxR,
+	input logic SelExpMuxR, SelManMuxR, Result,
 	input StateType State);  //fsm state
 
 //when reset state = idle
@@ -73,26 +73,26 @@ a_explmux: assert property(p_explmux) else $error("SelExpMux & SelSRMux is not z
 //if expdiff is 0 srenable =0 else 1
 property p_expdiffz;
 	@(posedge Clock) disable iff (Reset)
-	(ExpDiff == '0) |=> ((ShiftRightEnable == '0) && (ShiftRightAmount == '0));
+	(ExpDiff == '0 && Go) |=> ((ShiftRightEnable == '0) && (ShiftRightAmount == '0));
 endproperty
 a_expdiffz: assert property(p_expdiffz) else $error("SR enable and SR amount is not zero when ExpDiff is zero");	
 
 property p_expdiffnz;
 	@(posedge Clock) disable iff (Reset)
-	(State == IDLE && ExpDiff != '0) |=> (ShiftRightEnable && (ShiftRightAmount == 5'b10111 || ShiftRightAmount == ExpDiff)) ##1 !(ShiftRightEnable && (ShiftRightAmount == 5'b10111 || ShiftRightAmount == ExpDiff));
+	(State == IDLE && ExpDiff != '0 && Go) |=> (ShiftRightEnable && (ShiftRightAmount == 5'b10111 || ShiftRightAmount == ExpDiff)) ##1 !(ShiftRightEnable && (ShiftRightAmount == 5'b10111 || ShiftRightAmount == ExpDiff));
 endproperty
 a_expdiffnz: assert property(p_expdiffnz) else $error("SR enable and SR amount is not set when ExpDiff is not zero");	
 
 //SelExpMux & SelSRMuxG is set when ExpSet is set and vice versa
 property p_expset;
 	@(posedge Clock) disable iff (Reset)
-	(State == IDLE && ExpSet) |=> (SelExpMux && SelSRMuxG);
+	(State == IDLE && ExpSet && Go) |=> (SelExpMux && SelSRMuxG);
 endproperty
 a_expset: assert property(p_expset) else $error("SelExpMux & SelSRMuxG is not set when ExpSet is set");
 
 property p_expsetz;
 	@(posedge Clock) disable iff (Reset)
-	(State == IDLE && !ExpSet) |=> !(SelExpMux && SelSRMuxG);
+	(State == IDLE && !ExpSet && Go) |=> !(SelExpMux && SelSRMuxG);
 endproperty
 a_expsetz: assert property(p_expsetz) else $error("SelExpMux & SelSRMuxG is set when ExpSet is not set");
 
@@ -159,5 +159,12 @@ property p_normuxsel;
 	!SelExpMuxR && !SelManMuxR && Out[24] |=> (SelExpMuxR && SelManMuxR)[*1:$] ##1 !Out[24];
 endproperty
 a_normuxsel: assert property(p_normuxsel) else $error("SelExpMuxR and SelManMuxR are not set during rounding"); 
+
+property p_validresult;
+	@(posedge Clock) disable iff (Reset)
+	$fell(Go) ##1 !Go[*1:$] ##1 Result |-> Result throughout Go[->1];
+	endproperty
+a_validresult: assert property(p_validresult) else $error(""); 
+
 	
 endmodule
