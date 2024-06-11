@@ -1,15 +1,17 @@
 import floatingpointpkg::*;
 
-module FloatingPointAdder(input float AddendA,
-                          input float AddendB,
-                          input logic Go,
-                          input logic Clock,
-                          input logic Reset,
-                          output float Result,
-                          output logic Zero, 
-                          output logic Inf,
-                          output logic Nan);
+module FloatingPointAdder(AddendA, AddendB, Go, Clock, Reset, Result, Zero, Inf, Nan);
 parameter VERSION = "0.3";
+
+input float AddendA;
+input float AddendB;
+input logic Go;
+input logic Clock;
+input logic Reset;
+output float Result;
+output logic Zero;
+output logic Inf;
+output logic Nan;
 
 // *** Small ALU
 // Inputs: exponent from AddendA
@@ -33,6 +35,7 @@ always_ff @(posedge Clock)
         R0.SignA <= AddendA.sign;
         R0.ExpA  <= AddendA.exp;
         R0.MantA <= AddendA.frac;
+
         R0.SignB <= AddendB.sign;
         R0.ExpB  <= AddendB.exp;
         R0.MantB <= AddendB.frac;
@@ -45,7 +48,7 @@ always_ff @(posedge Clock)
 //         expSelect from Control
 //
 // Outputs: value of larger exponent to ExpIncrement MUX
-assign preNormExp = (SelExpMux) ? R0.ExpA : R0.ExpB;
+assign largeExp = (SelExpMux) ? R0.ExpA : R0.ExpB;
 
 // *** Small Mantissa MUX
 // Inputs: mantissa from AddendA
@@ -71,7 +74,7 @@ assign largeSign = (SelSRMuxG) ? R0.SignA : R0.SignB;
 //         pre-add shift amount from Control
 //
 // Outputs: shifted mantissa to Big ALU
-RightShifter #(48) shiftPreALU({smallMant, 24'h0}, ShiftRightEnable, ShiftRightAmount, {smallMantShifted, roundBit, stickyBits});
+RightShifter #(48) shiftPreALU({smallMant, 24'h0}, .ShiftRightEnable, .ShiftRightAmount, {smallMantShifted, roundBit, stickyBits});
 //      TODO: Add enable to Shift Right module or add Akhila Shift Right module 
 
 // *** Big ALU
@@ -82,6 +85,9 @@ RightShifter #(48) shiftPreALU({smallMant, 24'h0}, ShiftRightEnable, ShiftRightA
 // Outputs: mantissa sum to Control             ## Specifically FindFirstOne module I'm guessing
 //          mantissa sum to SumShift Mux         
 bigalu BigALU(smallMantShifted, largeMant, smallSign, largeSign, mantSum, ccc, ccz, ccv, ccn);
+
+// *** Zero Case MUX
+preNormExp = (ccz) ? '0 : largeExp;
 
 // *** Find First One
 // Needs to be placed before second set of registers so that result is visible to Control FSM
@@ -96,6 +102,7 @@ struct packed {
         logic [7:0] preNormExp, postNormExp;
         logic [24:0] preNormMant, postNormMant;
         logic preNormRound, preNormSticky;
+	logic [4:0] Index;
 } R1; 
 
 always_ff @(posedge Clock) 
@@ -109,9 +116,10 @@ always_ff @(posedge Clock)
         R1.preNormMant  <= mantSum;
         R1.postNormMant <= roundedMant;
         
+	R1.Index	 <= FFOIndex;
         R1.preNormRound  <= roundBit;
         R1.preNormSticky <= |stickyBits;
-        // PostNorm Round and Sticky not needed due to feedback being no-round case
+        // Index, PostNorm Round and Sticky not needed due to feedback being no-round case
         end
 
 
@@ -121,8 +129,8 @@ always_ff @(posedge Clock)
 //         sumShiftSelect from Control
 //
 // Outputs: un-normalized mantissa to Normalizing Shifter
-assign signToNorm  = (SelManMuxR) ? R1.postNormSign : R1.preNormSign;
-assign mantToNorm  = (SelManMuxR) ? R1.postNormMant : R1.preNormMant;
+assign signToNorm  = (SelMuxR) ? R1.postNormSign : R1.preNormSign;
+assign mantToNorm  = (SelMuxR) ? R1.postNormMant : R1.preNormMant;
 
 // *** ExpIncrement MUX
 // Inputs: larger exponent from Exponent MUX
@@ -130,7 +138,7 @@ assign mantToNorm  = (SelManMuxR) ? R1.postNormMant : R1.preNormMant;
 //         expIncrSelect from Control
 //
 // Outputs: pre-incremented/decremented exponent to ExpIncrDecr
-assign expToNorm = (SelExpMuxR) R1.postNormExp : R1.preNormExp;
+assign expToNorm = (SelMuxR) R1.postNormExp : R1.preNormExp;
 
 
 // *** Normalizer circuit includes:
@@ -149,7 +157,6 @@ assign expToNorm = (SelExpMuxR) R1.postNormExp : R1.preNormExp;
 Normalizer mantNormalizer(mantToNorm, expToNorm, SREn, postNormExp, mantToRound, FFOIndex, FFOValid);
 //      TODO: Modify Normalizer circuit to match FSM signals; remove FFO; update port list
 
-assign {shiftRound, shiftSticky} = (SREn) ? {mantToNorm[0], R1.preNormRound|R1.preNormSticky} : 2'b0;
 
 // *** Rounding Hardware
 // Inputs: shifted mantissa from Normalizing Shifter
@@ -161,6 +168,7 @@ assign {shiftRound, shiftSticky} = (SREn) ? {mantToNorm[0], R1.preNormRound|R1.p
 //          rounded mantissa to SumShift MUX
 //          rounded mantissa to Control
 //          rounded mantissa to Result.mantissa
+assign {shiftRound, shiftSticky} = (SREn) ? {mantToNorm[0], R1.preNormRound|R1.preNormSticky} : 2'b0;
 assign {round, sticky} = (NoShift) ? {R1.preNormRound, R1.preNormSticky} : {shiftRound, shiftSticky};
 RoundNearestEven RoundingHardware(roundedMant, mantToRound, round, sticky);
 
@@ -184,7 +192,7 @@ RoundNearestEven RoundingHardware(roundedMant, mantToRound, round, sticky);
 // TODO: Insert Anvitha's ControlFSM
 Control controlFSM(.Go, .Clock, .Reset,                      // Control base signals
                    .ExpSet, .ExpDiff,                        // Signals from expALU
-                   .FFOValid, .FFOIndex,                     // Signals from FFO
+                   .FFOValid, .FFOIndex, .Index(R1.Index),   // Signals from FFO
                    .roundedMant,                             // Result from rounding hardware
                    .SelExpMux, .SelSRMuxL, .SelSRMuxG,       // R0 Mux select signals
                    .ShiftRightEnable, .ShiftRightAmount,     // Right shifter values
