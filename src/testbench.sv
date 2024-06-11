@@ -101,7 +101,7 @@ module top;
 		/***************************/
 		// Test randomized test classes of normalized numbers only
 		testclass = new();
-		CLearConstraints(testclass);
+		ClearConstraints(testclass);
 		testclass.onlynorm_c.constraint_mode(1);
 		for(longint i = 0; i < NORMMAX; i++)
 		begin
@@ -112,7 +112,34 @@ module top;
 			repeat (1) @(negedge Clock);
 			AddendB = testclass.createFloat();
 			RunAdd();
-		end	
+		end
+
+		ClearConstraints(testclass);
+		testclass.alldenorm_c.constraint_mode(1);
+		for(longint i = 0; i < NORMMAX; i++)
+		begin
+			assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a denormalized float");
+			repeat (1) @(negedge Clock);
+			AddendA = testclass.createFloat();
+			assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a denormalized float");
+			repeat (1) @(negedge Clock);
+			AddendB = testclass.createFloat();
+			RunAdd();
+		end
+
+		ClearConstraints(testclass);
+		for(longint i = 0; i < NORMMAX; i++)
+		begin
+			assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a float");
+			repeat (1) @(negedge Clock);
+			AddendA = testclass.createFloat();
+			assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a float");
+			repeat (1) @(negedge Clock);
+			AddendB = testclass.createFloat();
+			RunAdd();
+		end
+		
+		
 	end
 
 endmodule
