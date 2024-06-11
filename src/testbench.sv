@@ -54,7 +54,21 @@ module top;
 		AddendB = '{0, 0, 0};
 
 		RunAdd();
+
+		// Check zero added to a number
+		repeat (1) @(negedge Clock);
+		AddendA = '{0, 0, 0};
+		repeat (1) @(negedge Clock);
+		AddendB = '{1, 110, 23'h7b_ef_19};
+
+		RunAdd();
 		
+		repeat (1) @(negedge Clock);
+		AddendA = '{0, 0, 0};
+		repeat (1) @(negedge Clock);
+		AddendB = '{1, 110, 23'h7b_ef_19};
+
+		RunAdd();
 		
 		// Check two large numbers added together.
 		repeat (2) @(negedge Clock);
@@ -95,6 +109,14 @@ module top;
 		AddendB = ShortrealToFloat(567.7892);
 
 		RunAdd();
+
+		repeat (2) @(negedge Clock);
+		AddendA = ShortrealToFloat(-5678.93854);
+		repeat (1) @(negedge Clock);
+		AddendB = ShortrealToFloat(-323.45671);
+
+		RunAdd();
+		
 
 		/****************************/
 		/**** RANDOMIZED TESTING ****/
