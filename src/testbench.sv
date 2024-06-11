@@ -64,7 +64,7 @@ module top;
 		RunAdd();
 		
 		repeat (1) @(negedge Clock);
-		AddendA = '{0, 0, 0};
+		AddendA = '{1, 0, 0};
 		repeat (1) @(negedge Clock);
 		AddendB = '{1, 110, 23'h7b_ef_19};
 
