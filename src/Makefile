@@ -14,7 +14,8 @@ clean:
 	rm -rf work
 
 floatingpointadder:
-	vlog -source -lint $(EXTRAFLAGS) floatingpointpkg.sv floatingpointadder.sv barrelshifter.sv expalu.sv findfirstone.sv round.sv normalizer.sv bigalu.sv rightshift.sv
+	vlog -source -lint $(EXTRAFLAGS) floatingpointpkg.sv fpclass.sv testbench.sv floatingpointadder.sv barrelshifter.sv expalu.sv findfirstone.sv round.sv normalizer.sv bigalu.sv rightshift.sv control.sv
+	vsim -c top
 
 floatpkg:
 	vlog -source -lint $(EXTRAFLAGS) floatingpointpkg.sv floatingpointpkgtest.sv

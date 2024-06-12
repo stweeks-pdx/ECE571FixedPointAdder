@@ -1,6 +1,6 @@
 import floatingpointpkg::*;
 
-module FloatingPointAdder(AddendA, AddendB, Go, Clock, Reset, Result, ResultReady, Zero, Inf, Nan);
+module FloatingPointAdder(AddendA, AddendB, Go, Clock, Reset, Result, Ready, Zero, Inf, Nan);
 parameter VERSION = "0.3";
 
 input float AddendA;
@@ -9,7 +9,7 @@ input logic Go;
 input logic Clock;
 input logic Reset;
 output float Result;
-output logic ResultReady;
+output logic Ready;
 output logic Zero;
 output logic Inf;
 output logic Nan;
@@ -17,14 +17,15 @@ output logic Nan;
 logic ExpSet;
 logic smallSign, largeSign, signToNorm;
 logic [7:0] ExpDiff, smallExp, largeExp, preNormExp, postNormExp, expToNorm;
-logic [23:0] smallMant, largeMant, smallMantShifted, mantSum, stickyBits;
+logic [23:0] smallMant, largeMant, smallMantShifted, mantSum;
+logic [22:0] stickyBits;
 logic roundBit, shiftRound, shiftSticky, round, sticky;
 logic [24:0] mantToNorm, mantToRound, roundedMant; 
 logic ccc, ccz, ccv, ccn;
 logic SelExpMux, SelSRMuxL, SelSRMuxG, SelMuxR, SREn, SLEn, NoShift;
 logic [4:0] FFOIndex, ShiftAmount;
 logic FFOValid;
-logic [7:0] ShiftRightAmount;
+logic [5:0] ShiftRightAmount;
 logic ShiftRightEnable;
 
 // *** Small ALU
@@ -212,10 +213,10 @@ Control controlFSM(.Go, .Clock, .Reset,                      // Control base sig
                    .SREn, .SLEn, .NoShift,		     // Normalizer control signals
                    .ShiftAmount,                             // Left shifter value
                    .SelMuxR, 		                     // R1 Mux select signal
-                   .ResultReady);                            // Result ready flag
+                   .Ready);                            // Result ready flag
 
 // *** Result latch
 //      TODO: Someone please check my implementation here
-always_ff @(posedge ResultReady) Result = {signToNorm, postNormExp, roundedMant[22:0]};
+always_ff @(posedge Ready) Result = {signToNorm, postNormExp, roundedMant[22:0]};
                 
 endmodule
