@@ -13,11 +13,10 @@ endpackage
 	SREn - enables right shifter
 	SLEn - enables left shifter
 	ShiftAmount - Amount of bits to be shifted in case of left shifter
-	NoShift - disable left and right shifter
-	IncrEn - increment the exponent
-	DecrEn - decrement the exponent
-	SelExpMuxR - selector for the exponent mux in case of rounding(rounding the 2nd time) 
-	SelManMuxR - selector for the mantissa mux in case of rounding(rounding the 2nd time)
+	NoShift - disable left and right shifter 
+	SelMuxR - selector for the rounding mux (used while rounding the 2nd time)
+//top module
+	Ready - Asserted after rounding and asserted until Go is set high
 **************************/
 
 
@@ -28,32 +27,23 @@ module Control #(
 	input Go,Clock,Reset,
 	//inputs from exponent difference
 	input ExpSet,
-	input [EXPBITS-1:0] ExpDiff,
+	input [EXPBITS-1:0] ExpDiff,Diff,
 	//inputs from FFO
 	input FFOValid,
-	input [$clog2(MANTISSABITS)-1:0] FFOIndex,
+	input [$clog2(MANTISSABITS)-1:0] FFOIndex,Index,
 	// inputs from rounding hardware
-	input [MANTISSABITS+1:0] Out,
+	input [MANTISSABITS+1:0] roundedMant,
 	//inputs to shift right
 	output logic SelExpMux,SelSRMuxL,SelSRMuxG,ShiftRightEnable,
-	output logic [$clog2(MANTISSABITS)-1:0] ShiftRightAmount,
+	output logic [$clog2(MANTISSABITS*2)-1:0] ShiftRightAmount,
 	//inputs to normalize 
-	output logic SREn,SLEn,NoShift,IncrEn,DecrEn,
+	output logic SREn,SLEn,NoShift,
 	output logic [$clog2(MANTISSABITS)-1:0] ShiftAmount,
-	output logic SelExpMuxR, SelManMuxR,
-	output logic Result );
+	output logic SelMuxR,
+	output logic Ready);
 
 	import controlpkg::*;
 
-	//enum {I_POS= 0,D_POS = 1,EGT_POS = 2,ELT_POS = 3,SR_POS = 4, SL_POS = 5, NS_POS = 6}StateBit;
-	/*enum logic [6:0] {IDLE = 7'b0000001<<I_POS,
-					DISSR  = 7'b0000001<<D_POS,
-					ENSRGT = 7'b0000001<<EGT_POS,
-					ENSRLT = 7'b0000001<<ELT_POS,
-					SR 	   = 7'b0000001<<SR_POS,
-					SL     = 7'b0000001<<SL_POS,
-					NOSHIFT= 7'b0000001<<NS_POS} State, NextState;*/
-	//enum logic [2:0] {IDLE,DISSR,ENSRGT,ENSRLT,SR,SL,NOSHIFT} State, NextState;
 	StateType State,NextState;
 					
 	localparam INDEXCARRY = 24;
@@ -65,11 +55,13 @@ module Control #(
 	always_ff @ (posedge Clock)
 	begin
 		if (Reset)
-			Result <= '0;
+			Ready <= '0;
 		else if (FlagResult)
-			Result <= '1;
+			Ready <= '1;
 		else if (Go)
-			Result <= '0;
+			Ready <= '0;
+		else
+			Ready <= Ready;
 	end
 	
 	always_ff @ (posedge Clock)
@@ -130,34 +122,34 @@ module Control #(
 				end
 				
 		SR: begin
-				if (Out[INDEXCARRY]=='0)
+				if (roundedMant[INDEXCARRY]=='0)
 						NextState = RESULT;
-					else if (Out[INDEXCARRY])
+					else if (roundedMant[INDEXCARRY])
 						NextState = ROUND;
 					else
 						NextState = SR;
 				end
 				
 		SL: begin
-				if (Out[INDEXCARRY]=='0)
+				if (roundedMant[INDEXCARRY]=='0)
 						NextState = RESULT;
-					else if (Out[INDEXCARRY])
+					else if (roundedMant[INDEXCARRY])
 						NextState = ROUND;
 					else
 						NextState = SL;			
 				end
 				
 		NOSHIFT: begin
-					if (Out[INDEXCARRY]=='0)
+					if (roundedMant[INDEXCARRY]=='0)
 						NextState = RESULT;
-					else if (Out[INDEXCARRY])
+					else if (roundedMant[INDEXCARRY])
 						NextState = ROUND;
 					else
 						NextState = NOSHIFT;		
 				end
 				
 		ROUND: begin
-					if (Out[INDEXCARRY]=='0)
+					if (roundedMant[INDEXCARRY]=='0)
 						NextState = RESULT;
 					else
 						NextState = ROUND;
@@ -174,8 +166,7 @@ module Control #(
 		{SelExpMux,SelSRMuxL,SelSRMuxG} = '0;
 		{ShiftRightEnable,ShiftRightAmount} = '0;
 		{SREn,SLEn,NoShift,ShiftAmount} = '0;
-		{IncrEn,DecrEn} = '0;
-		{SelExpMuxR,SelManMuxR} = '0;
+		SelMuxR = '0;
 		FlagResult = '0;
 		
 		unique case (State)
@@ -183,8 +174,8 @@ module Control #(
 				{SelExpMux,SelSRMuxL,SelSRMuxG} = '0;
 				{ShiftRightEnable,ShiftRightAmount} = '0;
 				{SREn,SLEn,NoShift,ShiftAmount} = '0;
-				{IncrEn,DecrEn} = '0;
-				{SelExpMuxR,SelManMuxR} = '0;
+				SelMuxR = '0;
+				FlagResult = '0;
 			end
 		
 		DISSR: begin
@@ -193,31 +184,30 @@ module Control #(
 				
 		ENSRGT: begin
 				ShiftRightEnable = '1; 
-				ShiftRightAmount = ExpDiff > MANTISSABITS ? MBITSEN : ExpDiff;
+				ShiftRightAmount = Diff > MANTISSABITS ? MBITSEN : Diff;
 				SelExpMux = '1; SelSRMuxG = '1;
 			end
 		
 		ENSRLT: begin
 				ShiftRightEnable = '1; 
-				ShiftRightAmount = ExpDiff > MANTISSABITS ? MBITSEN : ExpDiff;
+				ShiftRightAmount = Diff > MANTISSABITS ? MBITSEN : Diff;
 				SelSRMuxL = '1;
 			end
 		
-		SR: begin
-			SREn = '1; IncrEn = '1; 
-			end
-		
+		SR: SREn = '1;
+				
 		SL: begin
-			SLEn = '1; DecrEn = '1;
-			ShiftAmount = MBITSEN - FFOIndex;
+			SLEn = '1; 
+			ShiftAmount = MBITSEN - Index;
 			end
 		
 		NOSHIFT: NoShift = '1; 
 			
 		ROUND: begin
-				SelExpMuxR = '1; SelManMuxR = '1;
-				SREn = '1; IncrEn = '1; 
+				SelMuxR = '1;
+				SREn = '1;
 				end
+
 		RESULT: FlagResult = '1;
 		endcase
 	end 

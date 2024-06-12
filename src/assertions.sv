@@ -3,15 +3,15 @@ module ControlAssertions #(
 	parameter EXPBITS = 8,
 	parameter MANTISSABITS = 23)  
 (	input logic Go,Clock,Reset,ExpSet,
-	input logic [EXPBITS-1:0] ExpDiff,
+	input logic [EXPBITS-1:0] ExpDiff,Diff,
 	input logic FFOValid,
-	input logic [$clog2(MANTISSABITS)-1:0] FFOIndex,
-	input logic [MANTISSABITS+1:0] Out,
+	input logic [$clog2(MANTISSABITS)-1:0] FFOIndex,Index,
+	input logic [MANTISSABITS+1:0] roundedMant,
 	input logic SelExpMux,SelSRMuxL,SelSRMuxG,ShiftRightEnable,
-	input logic [$clog2(MANTISSABITS)-1:0] ShiftRightAmount,
-	input logic SREn,SLEn,NoShift,IncrEn,DecrEn,
+	input logic [$clog2(MANTISSABITS*2)-1:0] ShiftRightAmount,
+	input logic SREn,SLEn,NoShift,
 	input logic [$clog2(MANTISSABITS)-1:0] ShiftAmount,
-	input logic SelExpMuxR, SelManMuxR, Result,
+	input logic SelMuxR,Ready,
 	input StateType State);  //fsm state
 
 //when reset state = idle
@@ -79,7 +79,7 @@ a_expdiffz: assert property(p_expdiffz) else $error("SR enable and SR amount is 
 
 property p_expdiffnz;
 	@(posedge Clock) disable iff (Reset)
-	(State == IDLE && ExpDiff != '0 && Go) |=> (ShiftRightEnable && (ShiftRightAmount == 5'b10111 || ShiftRightAmount == ExpDiff)) ##1 !(ShiftRightEnable && (ShiftRightAmount == 5'b10111 || ShiftRightAmount == ExpDiff));
+	(State == IDLE && ExpDiff != '0 && Go) |=> (ShiftRightEnable && (ShiftRightAmount == 5'b10111 || ShiftRightAmount == Diff)) ##1 !(ShiftRightEnable && (ShiftRightAmount == 5'b10111 || ShiftRightAmount == Diff));
 endproperty
 a_expdiffnz: assert property(p_expdiffnz) else $error("SR enable and SR amount is not set when ExpDiff is not zero");	
 
@@ -118,22 +118,22 @@ a_noshift: assert property(p_noshift) else $error("when NoShift is set SLEn and 
 //if sr =1 incr = 1
 property p_srenincr;
 	@(posedge Clock) disable iff (Reset)
-	SREn |-> IncrEn && !DecrEn && ShiftAmount == 0 ;
+	SREn |-> ShiftAmount == 0 ;
 endproperty
-a_srenincr: assert property(p_srenincr) else $error("When SREn is set only IncrEn is set");
-               
+a_srenincr: assert property(p_srenincr) else $error("When SREn is set ShiftAmount is not zero");
+
 //if sl = 1 decr = 1
 property p_slendecr;
 	@(posedge Clock) disable iff (Reset)
-	SLEn |-> DecrEn && !IncrEn && ShiftAmount == MANTISSABITS - FFOIndex;
+	SLEn |-> ShiftAmount == MANTISSABITS - Index;
 endproperty
-a_slendecr: assert property(p_slendecr) else $error("When SLEn is set only DecrEn and ShiftAmount are set");
+a_slendecr: assert property(p_slendecr) else $error("When SLEn is set only ShiftAmount is not set to the required amount ");
 
 property p_noshiftsincrr;
 	@(posedge Clock) disable iff (Reset)
-	NoShift |-> !IncrEn && !DecrEn && ShiftAmount == 0;
+	NoShift |-> ShiftAmount == 0;
 endproperty
-a_noshiftsincrr: assert property(p_noshiftsincrr) else $error("When NoShift is set IncrEn and DecrEn are not reset");
+a_noshiftsincrr: assert property(p_noshiftsincrr) else $error("When NoShift is set shift amount is not zero");
 
 //FFOValid
 property p_ffovalidshifter;
@@ -150,21 +150,21 @@ a_ffovalidreset: assert property(p_ffovalidreset) else $error("When FFOValid is 
 
 property p_ffovalidmuxsel;
 	@(posedge Clock) disable iff (Reset)
-	(FFOValid || !FFOValid)&& (State == DISSR || State == ENSRGT || State == ENSRLT)  |=> !SelExpMuxR && !SelManMuxR;
+	(FFOValid || !FFOValid)&& (State == DISSR || State == ENSRGT || State == ENSRLT)  |=> !SelMuxR;
 endproperty
-a_ffovalidmuxsel: assert property(p_ffovalidmuxsel) else $error("When FFOValid is reset or set, SelExpMuxR and SelManMuxR are set");
+a_ffovalidmuxsel: assert property(p_ffovalidmuxsel) else $error("When FFOValid is reset or set, SelMuxR is set");
 
 property p_normuxsel;
 	@(posedge Clock) disable iff (Reset)
-	!SelExpMuxR && !SelManMuxR && Out[24] |=> (SelExpMuxR && SelManMuxR)[*1:$] ##1 !Out[24];
+	!SelMuxR && roundedMant[24] |=> (SelMuxR)[*1:$] ##1 !roundedMant[24];
 endproperty
-a_normuxsel: assert property(p_normuxsel) else $error("SelExpMuxR and SelManMuxR are not set during rounding"); 
+a_normuxsel: assert property(p_normuxsel) else $error("SelMuxR is not set during rounding"); 
 
 property p_validresult;
 	@(posedge Clock) disable iff (Reset)
-	$fell(Go) ##1 !Go[*1:$] ##1 Result |-> Result throughout Go[->1];
+	$fell(Go) ##1 !Go[*1:$] ##1 Ready |-> Ready throughout Go[->1];
 	endproperty
-a_validresult: assert property(p_validresult) else $error(""); 
+a_validresult: assert property(p_validresult) else $error("Ready is not set high until Go is asserted"); 
 
-	
+
 endmodule

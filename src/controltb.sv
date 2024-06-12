@@ -2,40 +2,41 @@ module top;
 	parameter EXPBITS = 8;
 	parameter MANTISSABITS = 23;
 	localparam NBITS = $clog2(MANTISSABITS);
+	localparam NBITSE = $clog2(MANTISSABITS*2);
 	
 	logic Go,Clock,Reset,ExpSet,FFOValid;
-	logic [EXPBITS-1:0] ExpDiff; 
-	logic [NBITS-1:0] FFOIndex;
-	logic RoundUp;
-	logic [MANTISSABITS+1:0] Out;
+	logic [EXPBITS-1:0] ExpDiff,Diff;
+	logic [NBITS-1:0] FFOIndex,Index;
+	logic [MANTISSABITS+1:0] roundedMant;
 	
 	wire SelExpMux,SelSRMuxL,SelSRMuxG,ShiftRightEnable;
-	wire [NBITS-1:0] ShiftRightAmount,ShiftAmount;
-	wire SREn,SLEn,NoShift,IncrEn,DecrEn;
-	wire SelExpMuxR,SelManMuxR,Result;
+	wire [NBITSE-1:0] ShiftRightAmount;
+	wire [NBITS-1:0] ShiftAmount;
+	wire SREn,SLEn,NoShift;
+	wire SelMuxR,Ready;
 	
 	localparam DUTYCYCLE = 10;
 	
-	Control #(EXPBITS,MANTISSABITS) DUT (Go,Clock,Reset,ExpSet,ExpDiff,FFOValid,FFOIndex,Out,SelExpMux,SelSRMuxL,SelSRMuxG,ShiftRightEnable,ShiftRightAmount,SREn,SLEn,NoShift,IncrEn,DecrEn,ShiftAmount,SelExpMuxR, SelManMuxR,Result);
-	bind Control ControlAssertions #(EXPBITS,MANTISSABITS) DUTA (Go,Clock,Reset,ExpSet,ExpDiff,FFOValid,FFOIndex,Out,SelExpMux,SelSRMuxL,SelSRMuxG,ShiftRightEnable,ShiftRightAmount,SREn,SLEn,NoShift,IncrEn,DecrEn,ShiftAmount,SelExpMuxR,SelManMuxR,Result,State);
+	Control #(EXPBITS,MANTISSABITS) DUT (.*);
+	bind Control ControlAssertions #(EXPBITS,MANTISSABITS) DUTA (.*);
 	
 	task Initiate(input logic ready,set,input logic [EXPBITS-1:0] diff);
 		@(negedge Clock)
 		Go = ready;
 		#(DUTYCYCLE/3);
-		ExpSet = set;  ExpDiff = diff;
+		ExpSet = set;  ExpDiff = diff; Diff = diff;
 	endtask
 	
 	task Normalize(input logic ready,valid,input logic [NBITS-1:0] index);
 		@(negedge Clock); 
 		Go = ready;
 		FFOValid = valid;
-		FFOIndex = index;
+		FFOIndex = index; Index = index;
 	endtask
 	
-	task Rounding(input logic [MANTISSABITS+1:0] out);
+	task Rounding(input logic [MANTISSABITS+1:0] roundedmant);
 		@(negedge Clock);
-		Out = out;
+		roundedMant = roundedmant;
 		@(negedge Clock);
 	endtask
 
