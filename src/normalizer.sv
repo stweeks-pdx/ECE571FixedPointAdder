@@ -24,7 +24,7 @@ assign fillIn = '0;
 /* Normalizing the mantissa */
 assign rightShiftMantissa = mantissa >> 1;
 
-assign LeftShiftAmount = (SLEn) ? (ShiftAmount):0; // Looking to normalize so first one is at 23th bit
+assign LeftShiftAmount = (SLEn) ? ShiftAmount:0; // Looking to normalize so first one is at 23th bit
 
 BarrelShifter #(.N(FILL_TO)) shiftMantissa({fillIn, mantissa}, LeftShiftAmount, 1'b0, {fillOut, leftShiftMantissa});
 

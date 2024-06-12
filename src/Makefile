@@ -13,6 +13,9 @@ build:
 clean:
 	rm -rf work
 
+floatingpointadder:
+	vlog -source -lint $(EXTRAFLAGS) floatingpointpkg.sv floatingpointadder.sv barrelshifter.sv expalu.sv findfirstone.sv round.sv normalizer.sv bigalu.sv rightshift.sv
+
 floatpkg:
 	vlog -source -lint $(EXTRAFLAGS) floatingpointpkg.sv floatingpointpkgtest.sv
 	vsim -c top
@@ -31,7 +34,7 @@ findfirstone:
 
 round:
 	vlog -source -lint $(EXTRAFLAGS) round.sv roundtb.sv
-  vsim -c top
+	vsim -c top
 
 normalizer:
 	vlog -source -lint $(EXTRAFLAGS) normalizer.sv barrelshifter.sv findfirstone.sv normalizertb.sv

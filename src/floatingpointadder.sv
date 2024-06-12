@@ -1,6 +1,6 @@
 import floatingpointpkg::*;
 
-module FloatingPointAdder(AddendA, AddendB, Go, Clock, Reset, Result, Zero, Inf, Nan);
+module FloatingPointAdder(AddendA, AddendB, Go, Clock, Reset, Result, ResultReady, Zero, Inf, Nan);
 parameter VERSION = "0.3";
 
 input float AddendA;
@@ -9,9 +9,23 @@ input logic Go;
 input logic Clock;
 input logic Reset;
 output float Result;
+output logic ResultReady;
 output logic Zero;
 output logic Inf;
 output logic Nan;
+
+logic ExpSet;
+logic smallSign, largeSign, signToNorm;
+logic [7:0] ExpDiff, smallExp, largeExp, preNormExp, postNormExp, expToNorm;
+logic [23:0] smallMant, largeMant, smallMantShifted, mantSum, stickyBits;
+logic roundBit, shiftRound, shiftSticky, round, sticky;
+logic [24:0] mantToNorm, mantToRound, roundedMant; 
+logic ccc, ccz, ccv, ccn;
+logic SelExpMux, SelSRMuxL, SelSRMuxG, SelMuxR, SREn, SLEn, NoShift;
+logic [4:0] FFOIndex, ShiftAmount;
+logic FFOValid;
+logic [7:0] ShiftRightAmount;
+logic ShiftRightEnable;
 
 // *** Small ALU
 // Inputs: exponent from AddendA
@@ -74,7 +88,7 @@ assign largeSign = (SelSRMuxG) ? R0.SignA : R0.SignB;
 //         pre-add shift amount from Control
 //
 // Outputs: shifted mantissa to Big ALU
-RightShifter #(48) shiftPreALU({smallMant, 24'h0}, .ShiftRightEnable, .ShiftRightAmount, {smallMantShifted, roundBit, stickyBits});
+RightShifter #(48) shiftPreALU(.In({smallMant, 24'h0}), .ShiftRightEnable, .ShiftRightAmount, .Out({smallMantShifted, roundBit, stickyBits}));
 
 
 // *** Big ALU
@@ -87,11 +101,11 @@ RightShifter #(48) shiftPreALU({smallMant, 24'h0}, .ShiftRightEnable, .ShiftRigh
 bigalu BigALU(smallMantShifted, largeMant, smallSign, largeSign, mantSum, ccc, ccz, ccv, ccn);
 
 // *** Zero Case MUX
-preNormExp = (ccz) ? '0 : largeExp;
+assign preNormExp = (ccz) ? '0 : largeExp;
 
 // *** Find First One
 // Needs to be placed before second set of registers so that result is visible to Control FSM
-FindFirstOne MantissaFFO({ccc, mantSum}, .FFOIndex, .FFOValid); // FFO on 25 bit mantissa sum
+FindFirstOne MantissaFFO(.word({ccc, mantSum}), .index(FFOIndex), .valid(FFOValid)); // FFO on 25 bit mantissa sum
 
 
 // *** Register1
@@ -113,7 +127,7 @@ always_ff @(posedge Clock)
         R1.preNormExp  <= preNormExp;
         R1.postNormExp <= postNormExp;
         
-        R1.preNormMant  <= mantSum;
+        R1.preNormMant  <= {ccc, mantSum};
         R1.postNormMant <= roundedMant;
         
 	R1.Index	 <= FFOIndex;
@@ -138,7 +152,7 @@ assign mantToNorm  = (SelMuxR) ? R1.postNormMant : R1.preNormMant;
 //         expIncrSelect from Control
 //
 // Outputs: pre-incremented/decremented exponent to ExpIncrDecr
-assign expToNorm = (SelMuxR) R1.postNormExp : R1.preNormExp;
+assign expToNorm = (SelMuxR) ? R1.postNormExp : R1.preNormExp;
 
 
 // *** Normalizer circuit includes:
@@ -154,8 +168,7 @@ assign expToNorm = (SelMuxR) R1.postNormExp : R1.preNormExp;
 //
 // Outputs: shifted mantissa to Rounding Hardware
 //          sign bit to Result.sign
-Normalizer mantNormalizer(mantToNorm, expToNorm, SREn, postNormExp, mantToRound, FFOIndex, FFOValid);
-//      TODO: Modify Normalizer circuit to match FSM signals; remove FFO; update port list
+Normalizer mantNormalizer(mantToNorm, expToNorm, SREn, SLEn, ShiftAmount, postNormExp, mantToRound);
 
 
 // *** Rounding Hardware
@@ -196,9 +209,9 @@ Control controlFSM(.Go, .Clock, .Reset,                      // Control base sig
                    .roundedMant,                             // Result from rounding hardware
                    .SelExpMux, .SelSRMuxL, .SelSRMuxG,       // R0 Mux select signals
                    .ShiftRightEnable, .ShiftRightAmount,     // Right shifter values
-                   .SREn, .SLEn, .NoShift, .IncrEn, .DecrEn  // Normalizer control signals
-                   .ShiftAmount                              // Left shifter value
-                   .SelExpMuxR, SelManMuxR,                  // R1 Mux select signals
+                   .SREn, .SLEn, .NoShift,		     // Normalizer control signals
+                   .ShiftAmount,                             // Left shifter value
+                   .SelMuxR, 		                     // R1 Mux select signal
                    .ResultReady);                            // Result ready flag
 
 // *** Result latch
