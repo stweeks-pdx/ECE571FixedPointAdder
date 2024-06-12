@@ -75,7 +75,7 @@ assign largeSign = (SelSRMuxG) ? R0.SignA : R0.SignB;
 //
 // Outputs: shifted mantissa to Big ALU
 RightShifter #(48) shiftPreALU({smallMant, 24'h0}, .ShiftRightEnable, .ShiftRightAmount, {smallMantShifted, roundBit, stickyBits});
-//      TODO: Add enable to Shift Right module or add Akhila Shift Right module 
+
 
 // *** Big ALU
 // Inputs: shifted mantissa from Pre-add Shifter

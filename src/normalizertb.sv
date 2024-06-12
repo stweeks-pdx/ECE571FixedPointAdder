@@ -13,13 +13,20 @@ logic signed [EXP_MSB:0] exp;
 logic	 	         shiftRight;	// Signal for control if right shift is needed
 logic [EXP_MSB:0]        normedExp, expectedExp;
 logic [MANTISSA_MSB:0]   normedMantissa, expectedMantissa;
-logic [SHIFT_MSB:0]      index;		// Signal to control for index
+logic [SHIFT_MSB:0]      index, ShiftAmount;		// Signal to control for index
 logic			 valid, expectedValid;
+logic			 SREn, SLEn;
+
 
 int j;
 int ErrorSeen = 0;
 
-Normalizer #(MANTISSA_N, EXP_N, FILL_TO) DUT(.mantissa, .exp, .shiftRight, .normedExp, .normedMantissa, .index, .valid);
+Normalizer #(MANTISSA_N, EXP_N, FILL_TO) normDUT(.mantissa, .exp, .SREn, .SLEn, .ShiftAmount, .normedExp, .normedMantissa);
+FindFirstOne #(MANTISSA_N) ffoDUT(mantissa, valid, index);
+
+assign SREn = mantissa[MANTISSA_MSB];
+assign SLEn = (SREn) ? 1'b0 : ~mantissa[MANTISSA_MSB-1] & valid;
+assign ShiftAmount = 23 - index;
 
 initial
 begin
