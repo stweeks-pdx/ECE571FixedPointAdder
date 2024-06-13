@@ -40,7 +40,7 @@ module Control #(
 	output logic SREn,SLEn,NoShift,
 	output logic [$clog2(MANTISSABITS)-1:0] ShiftAmount,
 	output logic SelMuxR,
-	output logic Ready);
+	output logic FlagResult);
 
 	import controlpkg::*;
 
@@ -50,19 +50,6 @@ module Control #(
 	localparam INDEXONE = 23;
 	localparam NBITS = $clog2(MANTISSABITS);
 	logic [NBITS-1:0] MBITSEN = 5'b10111; // MBITSEN = 23;
-	logic FlagResult;
-
-	always_ff @ (posedge Clock)
-	begin
-		if (Reset)
-			Ready <= '0;
-		else if (FlagResult)
-			Ready <= '1;
-		else if (Go)
-			Ready <= '0;
-		else
-			Ready <= Ready;
-	end
 	
 	always_ff @ (posedge Clock)
 	begin

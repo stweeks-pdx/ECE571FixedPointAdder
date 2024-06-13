@@ -13,7 +13,7 @@ module top;
 	wire [NBITSE-1:0] ShiftRightAmount;
 	wire [NBITS-1:0] ShiftAmount;
 	wire SREn,SLEn,NoShift;
-	wire SelMuxR,Ready;
+	wire SelMuxR,FlagResult;
 	
 	localparam DUTYCYCLE = 10;
 	

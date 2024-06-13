@@ -11,7 +11,7 @@ module ControlAssertions #(
 	input logic [$clog2(MANTISSABITS*2)-1:0] ShiftRightAmount,
 	input logic SREn,SLEn,NoShift,
 	input logic [$clog2(MANTISSABITS)-1:0] ShiftAmount,
-	input logic SelMuxR,Ready,
+	input logic SelMuxR,FlagResult,
 	input StateType State);  //fsm state
 
 //when reset state = idle
@@ -162,9 +162,9 @@ a_normuxsel: assert property(p_normuxsel) else $error("SelMuxR is not set during
 
 property p_validresult;
 	@(posedge Clock) disable iff (Reset)
-	$fell(Go) ##1 !Go[*1:$] ##1 Ready |-> Ready throughout Go[->1];
+	$fell(Go) |=> !Go[*1:$] ##1 FlagResult ##1 !FlagResult throughout Go[->1];
 	endproperty
-a_validresult: assert property(p_validresult) else $error("Ready is not set high until Go is asserted"); 
+a_validresult: assert property(p_validresult) else $error("FlagResult is not set high after rounding"); 
 
 
 endmodule
