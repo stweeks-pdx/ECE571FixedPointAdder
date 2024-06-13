@@ -13,7 +13,11 @@ and the Result of the computation will be on the Result line. The computation al
 zero, infinity, or not-a-number respectively. The AddendA, AddendB, and Result are all of type float, which is a packed struct representing the IEEE-754 single
 precision floating point number. Because it is packed, the user can either use the 32-bit number directly, or convert to a realshort using the provided package 
 interfaces. The floating point adder recieves a clock and reset for an internal control system, but the system is not designed to operate around a set calculation
-period but instead relies on handshaking for the computation.
+period but instead relies on handshaking for the computation. The design does not support denormalized numbers.
+
+## SV Constructs Used
+For this design we made use of the follwoing System Verilog constructs: unique case, packed structs, classes, randomized constraints, coverage, enums, always_ff,
+and always_comb.
 
 ## Sub Components
 
@@ -105,6 +109,43 @@ final randomization test disables all constraints and we generate 2^32 random nu
 
 We want to use coverage to verify that we see rounding, a denormalized result, and one of an INF or NaN in our results output (ideally both). The hope is by iterating over 2^32
 cases we increaase our chances of hitting all possibilities for the adder and any possible edge cases.
+
+For the class, FpClass, contained our constrained randomization. While not all constraints were used in the testing, below is an exhaustive list of all constraints in the class:
+
+1. Denormalized numbes are not generated
+
+2. Only denomarlized numbers are generated
+
+3. NaN is not generated
+
+4. Inf is not generated
+
+6. Exponent is in the range of 1 to 254
+
+7. Only normalized numbers are generated
+
+## Coverage
+Coverage samples the outputs of the floating-point adder using the following cover points:
+
+NOTE: Option is set to at least 1 value.
+
+1. Sign of the Result when Ready is asserted
+
+2. Exponent ranging from 1 to 254 when Ready is asserted
+
+3. Mantissa ranging from 0 to 2^23 - 1 when Ready is asserted
+
+4. Cross between Sign and Mantissa
+
+5. Cross between Sign and Exponent
+
+6. Result is Zero when Ready is asserted
+
+7. Result is Inf when Ready is asserted
+
+8. Result is NaN when Ready is asserted
+
+9. Result is Denorm when Ready is asserted 
 
 ## Submodule Testing
 We used the V approach to testing that was discussed in class. Each sub-module that we designed we also created tests for to verify that our approach was correct. This
