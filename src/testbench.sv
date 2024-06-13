@@ -26,7 +26,7 @@ module top;
 		Go = 1'b1;
 		@(negedge Clock) Go = 1'b0;
 		wait(Ready);
-	        if ( FloatToShortreal(Result) !== (FloatToShortreal(AddendA) + FloatToShortreal(AddendB)) )
+	        if ( FloatToShortreal(Result) != (FloatToShortreal(AddendA) + FloatToShortreal(AddendB)) )
                     $display("****ERORR Expected: Result = %b Received: Result = %b Inputs: AddendA = %b AddendB = %b",
                                ShortrealToFloat(FloatToShortreal(AddendA) + FloatToShortreal(AddendB)), Result, AddendA, AddendB);
 	// timeout and check need to go here somehow
