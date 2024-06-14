@@ -251,9 +251,10 @@ always_ff @(posedge Clock)
 	end
 
 assign Result = (FlagResult) ? '{R2.Sign, R2.Exp, R2.Mant} : Result;
+assign Inf = (FlagResult) ? (R2.Exp == 255) : Inf; 
+
 
 // *** Result latch
-//      TODO: Someone please check my implementation here
 always_ff @ (posedge Clock)
 	begin
 		if (Reset) begin
