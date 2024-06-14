@@ -6,7 +6,7 @@ module top;
 	localparam TRUE = 1'b1;
 	localparam FALSE = 1'b0;
 	localparam MAXFRAC = 23;
-	parameter NORMMAX = 2**16; //2**32;
+	parameter NORMMAX = 2**16; 
 
 	// DUT logic
 	float AddendA, AddendB, Result;
@@ -36,8 +36,6 @@ module top;
                     		$display("****ERORR Expected: Result = %b Received: Result = %b Inputs: AddendA = %b AddendB = %b",
                                ShortrealToFloat(FloatToShortreal(AddendA) + FloatToShortreal(AddendB)), Result, AddendA, AddendB);
 		end
-		
-	// timeout and check need to go here somehow
 	endtask
 	
 	//coverage
@@ -162,8 +160,6 @@ module top;
 		// Test randomized test classes of normalized numbers only
 		testclass = new();
 		
-	//	do
-	//	begin
 			ClearConstraints(testclass);
 			testclass.onlynorm_c.constraint_mode(1);
 			for(longint i = 0; i < NORMMAX; i++)
@@ -222,16 +218,15 @@ module top;
 				i_coverage = fpcover.inf.get_coverage();
 				n_coverage = fpcover.nan.get_coverage();
 			end
-		//end
-		//while((sm_coverage<100)||(se_coverage<100)||(z_coverage<100)||(i_coverage<100)||(n_coverage<100));
-		$display("Total number of testcases = %d",NumTests);
-	//	`ifdef DEBUG
+		
+		`ifdef DEBUG
+			$display("Total number of testcases = %d",NumTests);
 			$display("sm_coverage = %d",sm_coverage);
 			$display("se_coverage = %d",se_coverage);
 			$display("z_coverage  = %d",z_coverage );
 			$display("i_coverage = %d",i_coverage);
 			$display("n_coverage = %d",n_coverage);
-	//	`endif
+		`endif
 
 		$finish;
 	end
