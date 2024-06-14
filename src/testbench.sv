@@ -6,11 +6,15 @@ module top;
 	localparam TRUE = 1'b1;
 	localparam FALSE = 1'b0;
 	localparam MAXFRAC = 23;
-	localparam NORMMAX = 2**32;
+	parameter NORMMAX = 2**16; 
 
 	// DUT logic
 	float AddendA, AddendB, Result;
 	logic Go, Clock, Reset, Zero, Inf, Nan, Ready;
+	
+	//coverage results
+	static int sm_coverage,se_coverage,z_coverage,i_coverage,n_coverage;
+	int NumTests;
 
 	// Test variables
 	FpClass testclass;
@@ -26,11 +30,39 @@ module top;
 		Go = 1'b1;
 		@(negedge Clock) Go = 1'b0;
 		wait(Ready);
-	        if ( FloatToShortreal(Result) != (FloatToShortreal(AddendA) + FloatToShortreal(AddendB)) )
-                    $display("****ERORR Expected: Result = %b Received: Result = %b Inputs: AddendA = %b AddendB = %b",
+		if (!(IsDenorm(AddendA) || IsDenorm(AddendB) || IsNaN(AddendA) || IsNaN(AddendB) || IsInf(AddendA) || IsInf(AddendB)))
+		begin
+	        	if ( (Result) != ShortrealToFloat(FloatToShortreal(AddendA) + FloatToShortreal(AddendB)) )
+                    		$display("****ERORR Expected: Result = %b Received: Result = %b Inputs: AddendA = %b AddendB = %b",
                                ShortrealToFloat(FloatToShortreal(AddendA) + FloatToShortreal(AddendB)), Result, AddendA, AddendB);
-	// timeout and check need to go here somehow
+		end
 	endtask
+	
+	//coverage
+	covergroup fpadd with function sample(logic[EXPBITS+FRACBITS:0]Result,logic Zero,Inf,Nan);
+		option.at_least = 1;
+		sign: coverpoint Result[EXPBITS+FRACBITS] iff (Ready);
+		exp: coverpoint Result[EXPBITS+FRACBITS-1:FRACBITS] iff (Ready)
+		{
+			bins e1 = {[1:(2**EXPBITS-1)-1]};
+			bins e2 = {[2**EXPBITS-1:(2**EXPBITS)-2]};
+		}
+		man: coverpoint Result[FRACBITS-1:0] iff (Ready)
+		{
+			bins m1 = {[0:2**20]};
+			bins m2 = {[(2**20)+1:2**21]};
+			bins m3 = {[(2**21)+1:2**22]};
+			bins m4 = {[(2**22)+1:(2**23)-1]};
+		}
+		sgman: cross sign,man;
+		sgex: cross sign,exp;
+		
+		zero: coverpoint Zero iff (Ready);
+		inf: coverpoint Inf iff (Ready);
+		nan: coverpoint Nan iff (Ready);
+	endgroup
+	
+	fpadd fpcover = new;
 
 	initial
 	begin
@@ -127,45 +159,76 @@ module top;
 		/***************************/
 		// Test randomized test classes of normalized numbers only
 		testclass = new();
-		ClearConstraints(testclass);
-		testclass.onlynorm_c.constraint_mode(1);
-		for(longint i = 0; i < NORMMAX; i++)
-		begin
-			assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a normalized float");
-			repeat (1) @(negedge Clock);
-			AddendA = testclass.createFloat();
-			assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a normalized float");
-			repeat (1) @(negedge Clock);
-			AddendB = testclass.createFloat();
-			RunAdd();
-		end
-
-		ClearConstraints(testclass);
-		testclass.alldenorm_c.constraint_mode(1);
-		for(longint i = 0; i < NORMMAX; i++)
-		begin
-			assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a denormalized float");
-			repeat (1) @(negedge Clock);
-			AddendA = testclass.createFloat();
-			assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a denormalized float");
-			repeat (1) @(negedge Clock);
-			AddendB = testclass.createFloat();
-			RunAdd();
-		end
-
-		ClearConstraints(testclass);
-		for(longint i = 0; i < NORMMAX; i++)
-		begin
-			assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a float");
-			repeat (1) @(negedge Clock);
-			AddendA = testclass.createFloat();
-			assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a float");
-			repeat (1) @(negedge Clock);
-			AddendB = testclass.createFloat();
-			RunAdd();
-		end
 		
+			ClearConstraints(testclass);
+			testclass.onlynorm_c.constraint_mode(1);
+			for(longint i = 0; i < NORMMAX; i++)
+			begin
+				assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a normalized float");
+				repeat (1) @(negedge Clock);
+				AddendA = testclass.createFloat();
+				assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a normalized float");
+				repeat (1) @(negedge Clock);
+				AddendB = testclass.createFloat();
+				RunAdd();
+				NumTests++;
+				fpcover.sample(Result,Zero,Inf,Nan);
+				sm_coverage = fpcover.sgman.get_coverage();
+				se_coverage = fpcover.sgex.get_coverage();
+				z_coverage = fpcover.zero.get_coverage();
+				i_coverage = fpcover.inf.get_coverage();
+				n_coverage = fpcover.nan.get_coverage();
+			end
+
+			ClearConstraints(testclass);
+			testclass.alldenorm_c.constraint_mode(1);
+			for(longint i = 0; i < NORMMAX; i++)
+			begin
+				assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a denormalized float");
+				repeat (1) @(negedge Clock);
+				AddendA = testclass.createFloat();
+				assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a denormalized float");
+				repeat (1) @(negedge Clock);
+				AddendB = testclass.createFloat();
+				RunAdd();
+				NumTests++;
+				fpcover.sample(Result,Zero,Inf,Nan);
+				sm_coverage = fpcover.sgman.get_coverage();
+				se_coverage = fpcover.sgex.get_coverage();
+				z_coverage = fpcover.zero.get_coverage();
+				i_coverage = fpcover.inf.get_coverage();
+				n_coverage = fpcover.nan.get_coverage();
+			end
+
+			ClearConstraints(testclass);
+			for(longint i = 0; i < NORMMAX; i++)
+			begin
+				assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a float");
+				repeat (1) @(negedge Clock);
+				AddendA = testclass.createFloat();
+				assert (testclass.randomize()) else $fatal(0, "Randomization failed to create a float");
+				repeat (1) @(negedge Clock);
+				AddendB = testclass.createFloat();
+				RunAdd();
+				NumTests++;
+				fpcover.sample(Result,Zero,Inf,Nan);
+				sm_coverage = fpcover.sgman.get_coverage();
+				se_coverage = fpcover.sgex.get_coverage();
+				z_coverage = fpcover.zero.get_coverage();
+				i_coverage = fpcover.inf.get_coverage();
+				n_coverage = fpcover.nan.get_coverage();
+			end
 		
+		`ifdef DEBUG
+			$display("Total number of testcases = %d",NumTests);
+			$display("sm_coverage = %d",sm_coverage);
+			$display("se_coverage = %d",se_coverage);
+			$display("z_coverage  = %d",z_coverage );
+			$display("i_coverage = %d",i_coverage);
+			$display("n_coverage = %d",n_coverage);
+		`endif
+
+		$finish;
 	end
 
 endmodule

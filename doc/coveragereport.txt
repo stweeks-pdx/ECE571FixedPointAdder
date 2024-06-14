@@ -1,0 +1,268 @@
+QuestaSim-64 vcover 2021.3_1 Coverage Utility 2021.08 Aug 15 2021
+Start time: 21:01:09 on Jun 13,2024
+vcover report -verbose coverage.ucdb 
+Coverage Report by instance with details
+
+=================================================================================
+=== Instance: /top
+=== Design Unit: work.top
+=================================================================================
+
+Assertion Coverage:
+    Assertions                       6         6         0   100.00%
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Name                 Assertion   Design     Design     Lang File(Line)                Enable    Failure      Pass  FPSA   Failure Pass    Failure EOS  Formal       Formal
+                     Type        Unit       UnitType                                            Count        Count Action Log     Log     Limit   Note Status       Radius
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/top/#anonblk#31584#169#4#/#ublk#31584#170/immed__174
+                     Immediate   top        Verilog    SVA  testbench.sv(174)           on            0          1 CCCC   -       -     unlimited off                     
+/top/#anonblk#31584#169#4#/#ublk#31584#170/immed__171
+                     Immediate   top        Verilog    SVA  testbench.sv(171)           on            0          1 CCCC   -       -     unlimited off                     
+/top/#anonblk#31584#189#4#/#ublk#31584#190/immed__194
+                     Immediate   top        Verilog    SVA  testbench.sv(194)           on            0          1 CCCC   -       -     unlimited off                     
+/top/#anonblk#31584#189#4#/#ublk#31584#190/immed__191
+                     Immediate   top        Verilog    SVA  testbench.sv(191)           on            0          1 CCCC   -       -     unlimited off                     
+/top/#anonblk#31584#208#4#/#ublk#31584#209/immed__213
+                     Immediate   top        Verilog    SVA  testbench.sv(213)           on            0          1 CCCC   -       -     unlimited off                     
+/top/#anonblk#31584#208#4#/#ublk#31584#209/immed__210
+                     Immediate   top        Verilog    SVA  testbench.sv(210)           on            0          1 CCCC   -       -     unlimited off                     
+
+Covergroup Coverage:
+    Covergroups                      1        na        na   100.00%
+        Coverpoints/Crosses          8        na        na        na
+            Covergroup Bins         26        26         0   100.00%
+----------------------------------------------------------------------------------------------------------
+Covergroup                                             Metric       Goal       Bins    Status               
+                                                                                                         
+----------------------------------------------------------------------------------------------------------
+ TYPE /top/fpadd                                      100.00%        100          -    Covered              
+    covered/total bins:                                    26         26          -                      
+    missing/total bins:                                     0         26          -                      
+    % Hit:                                            100.00%        100          -                      
+    Coverpoint sign                                   100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+    Coverpoint exp                                    100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+    Coverpoint man                                    100.00%        100          -    Covered              
+        covered/total bins:                                 4          4          -                      
+        missing/total bins:                                 0          4          -                      
+        % Hit:                                        100.00%        100          -                      
+    Coverpoint zero                                   100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+    Coverpoint inf                                    100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+    Coverpoint nan                                    100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+    Cross sgman                                       100.00%        100          -    Covered              
+        covered/total bins:                                 8          8          -                      
+        missing/total bins:                                 0          8          -                      
+        % Hit:                                        100.00%        100          -                      
+    Cross sgex                                        100.00%        100          -    Covered              
+        covered/total bins:                                 4          4          -                      
+        missing/total bins:                                 0          4          -                      
+        % Hit:                                        100.00%        100          -                      
+ Covergroup instance \/top/fpcover                    100.00%        100          -    Covered              
+    covered/total bins:                                    26         26          -                      
+    missing/total bins:                                     0         26          -                      
+    % Hit:                                            100.00%        100          -                      
+    Coverpoint sign                                   100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+        bin auto[0]                                    131099          1          -    Covered              
+        bin auto[1]                                     65509          1          -    Covered              
+    Coverpoint exp                                    100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+        bin e1                                         130821          1          -    Covered              
+        bin e2                                           1007          1          -    Covered              
+    Coverpoint man                                    100.00%        100          -    Covered              
+        covered/total bins:                                 4          4          -                      
+        missing/total bins:                                 0          4          -                      
+        % Hit:                                        100.00%        100          -                      
+        bin m1                                          82176          1          -    Covered              
+        bin m2                                          16415          1          -    Covered              
+        bin m3                                          32780          1          -    Covered              
+        bin m4                                          65237          1          -    Covered              
+    Coverpoint zero                                   100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+        bin auto[0]                                    130832          1          -    Covered              
+        bin auto[1]                                     65776          1          -    Covered              
+    Coverpoint inf                                    100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+        bin auto[0]                                    196597          1          -    Covered              
+        bin auto[1]                                        11          1          -    Covered              
+    Coverpoint nan                                    100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+        bin auto[0]                                    196597          1          -    Covered              
+        bin auto[1]                                        11          1          -    Covered              
+    Cross sgman                                       100.00%        100          -    Covered              
+        covered/total bins:                                 8          8          -                      
+        missing/total bins:                                 0          8          -                      
+        % Hit:                                        100.00%        100          -                      
+        Auto, Default and User Defined Bins:
+            bin <auto[1],m4>                            32522          1          -    Covered              
+            bin <auto[0],m4>                            32715          1          -    Covered              
+            bin <auto[1],m3>                            16358          1          -    Covered              
+            bin <auto[0],m3>                            16422          1          -    Covered              
+            bin <auto[1],m2>                             8201          1          -    Covered              
+            bin <auto[0],m2>                             8214          1          -    Covered              
+            bin <auto[1],m1>                             8428          1          -    Covered              
+            bin <auto[0],m1>                            73748          1          -    Covered              
+    Cross sgex                                        100.00%        100          -    Covered              
+        covered/total bins:                                 4          4          -                      
+        missing/total bins:                                 0          4          -                      
+        % Hit:                                        100.00%        100          -                      
+        Auto, Default and User Defined Bins:
+            bin <auto[1],e2>                              497          1          -    Covered              
+            bin <auto[0],e2>                              510          1          -    Covered              
+            bin <auto[1],e1>                            65366          1          -    Covered              
+            bin <auto[0],e1>                            65455          1          -    Covered              
+
+COVERGROUP COVERAGE:
+----------------------------------------------------------------------------------------------------------
+Covergroup                                             Metric       Goal       Bins    Status               
+                                                                                                         
+----------------------------------------------------------------------------------------------------------
+ TYPE /top/fpadd                                      100.00%        100          -    Covered              
+    covered/total bins:                                    26         26          -                      
+    missing/total bins:                                     0         26          -                      
+    % Hit:                                            100.00%        100          -                      
+    Coverpoint sign                                   100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+    Coverpoint exp                                    100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+    Coverpoint man                                    100.00%        100          -    Covered              
+        covered/total bins:                                 4          4          -                      
+        missing/total bins:                                 0          4          -                      
+        % Hit:                                        100.00%        100          -                      
+    Coverpoint zero                                   100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+    Coverpoint inf                                    100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+    Coverpoint nan                                    100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+    Cross sgman                                       100.00%        100          -    Covered              
+        covered/total bins:                                 8          8          -                      
+        missing/total bins:                                 0          8          -                      
+        % Hit:                                        100.00%        100          -                      
+    Cross sgex                                        100.00%        100          -    Covered              
+        covered/total bins:                                 4          4          -                      
+        missing/total bins:                                 0          4          -                      
+        % Hit:                                        100.00%        100          -                      
+ Covergroup instance \/top/fpcover                    100.00%        100          -    Covered              
+    covered/total bins:                                    26         26          -                      
+    missing/total bins:                                     0         26          -                      
+    % Hit:                                            100.00%        100          -                      
+    Coverpoint sign                                   100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+        bin auto[0]                                    131099          1          -    Covered              
+        bin auto[1]                                     65509          1          -    Covered              
+    Coverpoint exp                                    100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+        bin e1                                         130821          1          -    Covered              
+        bin e2                                           1007          1          -    Covered              
+    Coverpoint man                                    100.00%        100          -    Covered              
+        covered/total bins:                                 4          4          -                      
+        missing/total bins:                                 0          4          -                      
+        % Hit:                                        100.00%        100          -                      
+        bin m1                                          82176          1          -    Covered              
+        bin m2                                          16415          1          -    Covered              
+        bin m3                                          32780          1          -    Covered              
+        bin m4                                          65237          1          -    Covered              
+    Coverpoint zero                                   100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+        bin auto[0]                                    130832          1          -    Covered              
+        bin auto[1]                                     65776          1          -    Covered              
+    Coverpoint inf                                    100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+        bin auto[0]                                    196597          1          -    Covered              
+        bin auto[1]                                        11          1          -    Covered              
+    Coverpoint nan                                    100.00%        100          -    Covered              
+        covered/total bins:                                 2          2          -                      
+        missing/total bins:                                 0          2          -                      
+        % Hit:                                        100.00%        100          -                      
+        bin auto[0]                                    196597          1          -    Covered              
+        bin auto[1]                                        11          1          -    Covered              
+    Cross sgman                                       100.00%        100          -    Covered              
+        covered/total bins:                                 8          8          -                      
+        missing/total bins:                                 0          8          -                      
+        % Hit:                                        100.00%        100          -                      
+        Auto, Default and User Defined Bins:
+            bin <auto[1],m4>                            32522          1          -    Covered              
+            bin <auto[0],m4>                            32715          1          -    Covered              
+            bin <auto[1],m3>                            16358          1          -    Covered              
+            bin <auto[0],m3>                            16422          1          -    Covered              
+            bin <auto[1],m2>                             8201          1          -    Covered              
+            bin <auto[0],m2>                             8214          1          -    Covered              
+            bin <auto[1],m1>                             8428          1          -    Covered              
+            bin <auto[0],m1>                            73748          1          -    Covered              
+    Cross sgex                                        100.00%        100          -    Covered              
+        covered/total bins:                                 4          4          -                      
+        missing/total bins:                                 0          4          -                      
+        % Hit:                                        100.00%        100          -                      
+        Auto, Default and User Defined Bins:
+            bin <auto[1],e2>                              497          1          -    Covered              
+            bin <auto[0],e2>                              510          1          -    Covered              
+            bin <auto[1],e1>                            65366          1          -    Covered              
+            bin <auto[0],e1>                            65455          1          -    Covered              
+
+TOTAL COVERGROUP COVERAGE: 100.00%  COVERGROUP TYPES: 1
+
+ASSERTION RESULTS:
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Name                 Assertion   Design     Design     Lang File(Line)                Enable    Failure      Pass  FPSA   Failure Pass    Failure EOS  Formal       Formal
+                     Type        Unit       UnitType                                            Count        Count Action Log     Log     Limit   Note Status       Radius
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/top/#anonblk#31584#169#4#/#ublk#31584#170/immed__174
+                     Immediate   top        Verilog    SVA  testbench.sv(174)           on            0          1 CCCC   -       -     unlimited off                     
+/top/#anonblk#31584#169#4#/#ublk#31584#170/immed__171
+                     Immediate   top        Verilog    SVA  testbench.sv(171)           on            0          1 CCCC   -       -     unlimited off                     
+/top/#anonblk#31584#189#4#/#ublk#31584#190/immed__194
+                     Immediate   top        Verilog    SVA  testbench.sv(194)           on            0          1 CCCC   -       -     unlimited off                     
+/top/#anonblk#31584#189#4#/#ublk#31584#190/immed__191
+                     Immediate   top        Verilog    SVA  testbench.sv(191)           on            0          1 CCCC   -       -     unlimited off                     
+/top/#anonblk#31584#208#4#/#ublk#31584#209/immed__213
+                     Immediate   top        Verilog    SVA  testbench.sv(213)           on            0          1 CCCC   -       -     unlimited off                     
+/top/#anonblk#31584#208#4#/#ublk#31584#209/immed__210
+                     Immediate   top        Verilog    SVA  testbench.sv(210)           on            0          1 CCCC   -       -     unlimited off                     
+
+Total Coverage By Instance (filtered view): 100.00%
+
+End time: 21:01:09 on Jun 13,2024, Elapsed time: 0:00:00
+Errors: 0, Warnings: 0
