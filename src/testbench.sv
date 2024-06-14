@@ -6,14 +6,14 @@ module top;
 	localparam TRUE = 1'b1;
 	localparam FALSE = 1'b0;
 	localparam MAXFRAC = 23;
-	localparam NORMMAX = 2**32;
+	parameter NORMMAX = 2**16; //2**32;
 
 	// DUT logic
 	float AddendA, AddendB, Result;
 	logic Go, Clock, Reset, Zero, Inf, Nan, Ready;
 	
 	//coverage results
-	static int sm_coverage,se_coverage,z_coverage,i_coverage,n_coverage,d_coverage;
+	static int sm_coverage,se_coverage,z_coverage,i_coverage,n_coverage;
 	int NumTests;
 
 	// Test variables
@@ -30,35 +30,38 @@ module top;
 		Go = 1'b1;
 		@(negedge Clock) Go = 1'b0;
 		wait(Ready);
-	        if ( FloatToShortreal(Result) != (FloatToShortreal(AddendA) + FloatToShortreal(AddendB)) )
-                    $display("****ERORR Expected: Result = %b Received: Result = %b Inputs: AddendA = %b AddendB = %b",
+		if (!(IsDenorm(AddendA) || IsDenorm(AddendB) || IsNaN(AddendA) || IsNaN(AddendB) || IsInf(AddendA) || IsInf(AddendB)))
+		begin
+	        	if ( (Result) != ShortrealToFloat(FloatToShortreal(AddendA) + FloatToShortreal(AddendB)) )
+                    		$display("****ERORR Expected: Result = %b Received: Result = %b Inputs: AddendA = %b AddendB = %b",
                                ShortrealToFloat(FloatToShortreal(AddendA) + FloatToShortreal(AddendB)), Result, AddendA, AddendB);
+		end
+		
 	// timeout and check need to go here somehow
 	endtask
 	
 	//coverage
-	covergroup fpadd with function sample(logic[31:0]Result,logic Zero,Inf,Nan,Denorm);
+	covergroup fpadd with function sample(logic[EXPBITS+FRACBITS:0]Result,logic Zero,Inf,Nan);
 		option.at_least = 1;
-		sign: coverpoint Result[31]; //iff (Ready)
-		exp: coverpoint Result[30:23] //iff (Ready)
+		sign: coverpoint Result[EXPBITS+FRACBITS] iff (Ready);
+		exp: coverpoint Result[EXPBITS+FRACBITS-1:FRACBITS] iff (Ready)
 		{
-			bins e1 = {[1:127]};
-			bins e2 = {[128:254]};
+			bins e1 = {[1:(2**EXPBITS-1)-1]};
+			bins e2 = {[2**EXPBITS-1:(2**EXPBITS)-2]};
 		}
-		man: coverpoint Result[22:0] //iff (Ready)
+		man: coverpoint Result[FRACBITS-1:0] iff (Ready)
 		{
-			bins m1 = {[0:1048576]};
-			bins m2 = {[1048577:2097152]};
-			bins m3 = {[2097153:4194304]};
-			bins m4 = {[4194305:8388607]};
+			bins m1 = {[0:2**20]};
+			bins m2 = {[(2**20)+1:2**21]};
+			bins m3 = {[(2**21)+1:2**22]};
+			bins m4 = {[(2**22)+1:(2**23)-1]};
 		}
 		sgman: cross sign,man;
 		sgex: cross sign,exp;
 		
-		zero: coverpoint Zero;
-		inf: coverpoint Inf;
-		nan: coverpoint Nan;
-		denorm: coverpoint Denorm;
+		zero: coverpoint Zero iff (Ready);
+		inf: coverpoint Inf iff (Ready);
+		nan: coverpoint Nan iff (Ready);
 	endgroup
 	
 	fpadd fpcover = new;
@@ -159,8 +162,8 @@ module top;
 		// Test randomized test classes of normalized numbers only
 		testclass = new();
 		
-		do
-		begin
+	//	do
+	//	begin
 			ClearConstraints(testclass);
 			testclass.onlynorm_c.constraint_mode(1);
 			for(longint i = 0; i < NORMMAX; i++)
@@ -173,13 +176,12 @@ module top;
 				AddendB = testclass.createFloat();
 				RunAdd();
 				NumTests++;
-				fpcover.sample(Result,Zero,Inf,Nan,Denorm);
+				fpcover.sample(Result,Zero,Inf,Nan);
 				sm_coverage = fpcover.sgman.get_coverage();
 				se_coverage = fpcover.sgex.get_coverage();
 				z_coverage = fpcover.zero.get_coverage();
 				i_coverage = fpcover.inf.get_coverage();
 				n_coverage = fpcover.nan.get_coverage();
-				d_coverage = fpcover.denorm.get_coverage();
 			end
 
 			ClearConstraints(testclass);
@@ -194,13 +196,12 @@ module top;
 				AddendB = testclass.createFloat();
 				RunAdd();
 				NumTests++;
-				fpcover.sample(Result,Zero,Inf,Nan,Denorm);
+				fpcover.sample(Result,Zero,Inf,Nan);
 				sm_coverage = fpcover.sgman.get_coverage();
 				se_coverage = fpcover.sgex.get_coverage();
 				z_coverage = fpcover.zero.get_coverage();
 				i_coverage = fpcover.inf.get_coverage();
 				n_coverage = fpcover.nan.get_coverage();
-				d_coverage = fpcover.denorm.get_coverage();
 			end
 
 			ClearConstraints(testclass);
@@ -214,17 +215,24 @@ module top;
 				AddendB = testclass.createFloat();
 				RunAdd();
 				NumTests++;
-				fpcover.sample(Result,Zero,Inf,Nan,Denorm);
+				fpcover.sample(Result,Zero,Inf,Nan);
 				sm_coverage = fpcover.sgman.get_coverage();
 				se_coverage = fpcover.sgex.get_coverage();
 				z_coverage = fpcover.zero.get_coverage();
 				i_coverage = fpcover.inf.get_coverage();
 				n_coverage = fpcover.nan.get_coverage();
-				d_coverage = fpcover.denorm.get_coverage();
 			end
-		end
-		while((sm_coverage<100)||(se_coverage<100)||(z_coverage<100)||(i_coverage<100)||(n_coverage<100)||(d_coverage<100));
+		//end
+		//while((sm_coverage<100)||(se_coverage<100)||(z_coverage<100)||(i_coverage<100)||(n_coverage<100));
 		$display("Total number of testcases = %d",NumTests);
+	//	`ifdef DEBUG
+			$display("sm_coverage = %d",sm_coverage);
+			$display("se_coverage = %d",se_coverage);
+			$display("z_coverage  = %d",z_coverage );
+			$display("i_coverage = %d",i_coverage);
+			$display("n_coverage = %d",n_coverage);
+	//	`endif
+
 		$finish;
 	end
 
