@@ -18,7 +18,7 @@ logic ExpSet;
 logic smallSign, largeSign, smallSignToALU, largeSignToALU, signToNorm;
 logic [7:0] ExpDiff, smallExp, largeExp, preNormExp, postNormExp, expToNorm;
 logic [23:0] smallMant, largeMant, smallMantShifted, smallMantToALU, largeMantToALU, mantSum;
-logic [22:0] stickyBits;
+logic [22:0] stickyBits, resultMant;
 logic roundBit, shiftRound, shiftSticky, round, sticky;
 logic [24:0] mantToNorm, mantToRound, roundedMant; 
 logic ccc, ccz, ccv, ccn;
@@ -250,9 +250,11 @@ always_ff @(posedge Clock)
 `endif
 	end
 
-assign Result = (FlagResult) ? '{R2.Sign, R2.Exp, R2.Mant} : Result;
+assign resultMant = (R2.Exp == 255) ? '0 : R2.Mant;
+assign Result = (FlagResult) ? '{R2.Sign, R2.Exp, resultMant} : Result;
 assign Inf = (FlagResult) ? (R2.Exp == 255) : Inf; 
-
+assign Nan = (FlagResult) ? Inf : Nan;	// Currently no way to distinguish, so flag both if exp is 255.
+assign Zero = (FlagResult) ? (R2.Exp == 0) : Zero;
 
 // *** Result latch
 always_ff @ (posedge Clock)
