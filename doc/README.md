@@ -8,12 +8,15 @@ This directory includes all documentation surrounding the design choices, for ho
 
 ## Floating Point Interface
 For the floating point system the user is required to put their two addends on lines addendA and addendB, when the user wants to begin computation they will set
-the Go bit high, in which place the Ready bit will go low. The Ready bit stays low until the computation is complete, where the system will set the Ready bit high
-and the Result of the computation will be on the Result line. The computation also will provide a Zero, Inf, and NaN flags to alert the user to if the result was
-zero, infinity, or not-a-number respectively. The AddendA, AddendB, and Result are all of type float, which is a packed struct representing the IEEE-754 single
-precision floating point number. Because it is packed, the user can either use the 32-bit number directly, or convert to a realshort using the provided package 
-interfaces. The floating point adder recieves a clock and reset for an internal control system, but the system is not designed to operate around a set calculation
-period but instead relies on handshaking for the computation. The design does not support denormalized numbers.
+the Go bit high (deassertion of Go is the responsibility of the user), in which place the Ready bit will go low. The Ready bit stays low until the computation 
+is complete, where the system will set the Ready bit high and the Result of the computation will be on the Result line. The computation also will provide a Zero,
+Inf, and NaN flags to alert the user to if the result was zero, infinity, or not-a-number respectively. This does not guarauntee that NaN or Inf is on the Result
+line. The AddendA, AddendB, and Result are all of type float, which is a packed struct representing the IEEE-754 single precision floating point number. Because it
+is packed, the user can either use the 32-bit number directly, or convert to a realshort using the provided package  interfaces. The floating point adder receives
+a clock and reset for an internal control system, but the system is not designed to operate around a set calculation period but instead relies on handshaking for
+the computation. The design does not support denormalized numbers.
+
+### NOTE: Currently NaN and Inf flag go high at the same time as we have no clever way to distinguish the two in the adder
 
 ## SV Constructs Used
 For this design we made use of the follwoing System Verilog constructs: unique case, packed structs, classes, randomized constraints, coverage, enums, always_ff,
@@ -26,7 +29,7 @@ Exponent ALU
 
 ![Exponent ALU](ExponentALU.jpg)
 
-The Exponent ALU is responsible for detemring which exponent is passed forward and by what amount the system should do a right shift of the smaller exponents'
+The Exponent ALU is responsible for determining which exponent is passed forward and by what amount the system should do a right shift of the smaller exponents
 mantissa. The exponent ALU takes in two 8-bit wide exponents and returns an 8-bit difference and set bit that are fed to the FSM. First the exponent ALU needs
 to de-bias the incoming exponents by subtracting 128 from them, it then will pass these to a comparison unit that sees if A >= B or A < B. If the former is true
 the ExpSet bit is set to 1, else it is set to 0. This set bit is also used to determine the subtraction operation where the smaller exponent is subtracted from
@@ -38,9 +41,10 @@ Big ALU
 ![Big ALU](BigAlu.jpg)
 
 The Big ALU is responsible for adding the 2-mantissas together using 2's compliment. Because the IEEE-754 standard is in signed magnitude, and we have the implied
-1 for the 1.M, we need to pass the sign down to select if we need to 2's compliment the numbers before adding, this is accomplished with the sign bit and 2:1 Mux.
-We also need to append the signed bit to the front of the values so as to add the signed information back in, to give the number a true 2's compliment value. Once
-this is accomplished we pass the values into an adder and return the result along with the ccc, ccz, ccv, and ccn flags to be consumed by the normalizer circuit.
+1 for the 1.M, we need to pass the sign down to select if we need to 2's compliment the numbers before adding as well as a phantom 0, this is accomplished with the
+sign bit and 0 concactenated to the 2's compliment and fed to a 2:1 Mux. We also need to append thei phantom 0 and signed bit to the front of the values so as to add the signed
+information back in, to give the number a true 2's compliment value. Once this is accomplished we pass the values into an adder and return the result along with the
+ccc, ccz, ccv, and ccn flags to be consumed by the normalizer circuit.
 
 # Normalizer
 ### Barrel Shifter
@@ -58,15 +62,19 @@ this is accomplished we pass the values into an adder and return the result alon
 ![Normalizer Circuit](Normalizer.jpg)
 
 The normalizers circuitry (we decided to pull the find first one out but is a part of its function) purpose is to take in the mantissa and shift it to the appropriate
-point such that we get 1.M format. This may involve a single right shift or a left shifter. The left shift was implemented using the barrel shifter provided in class
+point such that we get 1.M format. This may involve a single right shift or a multiple left shift. The left shift was implemented using the barrel shifter provided in class
 where the right shifter is hard coded as it is only ever one shift. The find first one's circuities job is to find the first occurrance of a one and then return the
-index to that one location, allowing us to determine by what amount the mantissa needs shifter to create the 1.M value. The exponent normalization is also accomplished
-by this determined shift amount based on if we shift left or right then merely do a add or subtract operation.
+index to that one location, allowing us to determine by what amount the mantissa needs shifted to create the 1.M value. The exponent normalization is also accomplished
+by this determined shift amount based on if we shift left or right then merely do an add or subtract operation.
 
 # Rounding Hardware
-TODO: add rounding hardware diagram
+![Rounding Circuit](Rounding.png)
 
-# Controll System
+The Rounding circuit uses logic gates to assert a RoundUp signal. This signal is then added to the In value to make our rounded Out Value.
+There is currently a known issue where the rounding circuit is only capable of rounding up and does not take into account the possibility of rounding down in the case of differing
+signs; in these cases our circuit would need to reduce the magnitude rather than rounding up for specific RoundBit and StickyBit values.
+
+# Control System
 
 ![FSM Black Box](fsmblackbox.png)
 
@@ -98,11 +106,11 @@ For the testing our strategy we used directed and constrained randomized testing
 
 --- The two smallest numbers fo IEEE-754 added together
 
---- Three regular numbers added together
+--- Three float number pairs added together
 
 ---- one with opposite signs and two with matching signs
 
-For the randomized testing we used the floating point model we made in class but also added a constraint that produces only normalized numbers. We run through 2^32 cases
+For the randomized testing we used the floating point class we desing but also added a constraint that produces only normalized numbers. We run through 2^32 cases
 of this randomization constraint where we are feeding normalized numbers into our adder. We then randomize with the constraint of only denormalized numbers to pass into 
 our module to verify that we can handle denorms (without doing the addition) gracefully. We also do this 2^32 times to make sure we don't encounter any edge cases. Our 
 final randomization test disables all constraints and we generate 2^32 random numbers in the hopes to generate some NaN and INF numbers to verify our approach.
@@ -147,8 +155,58 @@ NOTE: Option is set to at least 1 value.
 
 9. Result is Denorm when Ready is asserted 
 
-## Submodule Testing
+## Sub-module Testing
 We used the V approach to testing that was discussed in class. Each sub-module that we designed we also created tests for to verify that our approach was correct. This
 allowed us to have extreme confidence that bugs at the sub-module level would be design based and spec based and not logical errors. Each test can be ran individually from
 the Makefile using the `make <module>` command and DEBUG can be set to true. This approach was chosen as it allowed multiple people to work on sub-components without having
 to have an immediate knowledge of the final integration of the system. Tests followed exhaustive testing standards where applicable, and assertions were used for the FSM.
+
+Assertions used for testing the FSM:
+1. On reset, FSM state must be IDLE.
+
+2. FSM State should not transition from DISSR to ENSRGT or ENSRLT.
+
+3. FSM State should not transition from ENSRGT to DISSR or ENSRLT.
+
+4. FSM State should not transition from ENSRLT to DISSR or ENSRGT.
+
+5. FSM State should not transition from SR to SL or NOSHIFT.
+
+6. FSM State should not transition from SL to SR or NOSHIFT.
+
+7. FSM State should not transition from NOSHIFT to SL or SR.
+
+8. SelSRMuxL should be low when SelExpMux &amp; SelSRMuxG is high.
+
+9. SelExpMux &amp; SelSRMux should be zero when SelSRMuxL is set.
+
+10. Shift Right enable and Shift Right amount should be zero when ExpDiff is zero.
+
+11. Shift Right enable and Shift Right amount should not be zero when ExpDiff is not zero.
+
+12. SelExpMux &amp; SelSRMuxG should be set when ExpSet is set.
+
+13. SelExpMux &amp; SelSRMuxG should not be set when ExpSet is not set.
+
+14. When SREn is set, SLEn and NoShift should not be set.
+
+15. When SLEn is set, SREn and NoShift should not be set.
+
+16. When NoShift is set, SLEn and SREn should not be set.
+
+17. When SREn is set, ShiftAmount should be zero.
+
+18. When SLEn is set, ShiftAmount should be set to the required amount.
+
+19. When NoShift is set, ShiftAmount should be zero.
+
+20. When FFOValid is set, one of the following signals (SREn, SLEn, NoShift) should be set.
+
+21. When FFOValid is not set, NoShift should be set.
+
+22. When FFOValid is reset or set in states DISSR, ENSRGT, and ENSRLT, SelMuxR
+should not be set.
+
+23. SelMuxR should be set in the ROUND state.
+
+24. FlagResult should be set after rounding.
